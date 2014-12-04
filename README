@@ -1,0 +1,27 @@
+ _                _       _  ___ _
+| |    ___   __ _(_)_ __ | |/ (_) |_
+| |   / _ \ / _` | | '_ \| ' /| | __|
+| |__| (_) | (_| | | | | | . \| | |_
+|_____\___/ \__, |_|_| |_|_|\_\_|\__|
+            |___/
+
+Overview
+========
+
+LoginKit is an attempt to implement a compatible, yet standalone alternative to
+logind and libsystemd-login (http://www.freedesktop.org/wiki/Software/systemd),
+which does not depend on a specific init system.
+
+It acts as a glue layer that exposes logind's interface, but uses ConsoleKit
+(https://github.com/ConsoleKit2/ConsoleKit2) as a backend.
+
+It's under heavy development and not ready for general use.
+
+Credits and Legal Information
+=============================
+
+LoginKit is is free and unencumbered software released under the terms of the
+MIT license; see COPYING for the license text. For a list of its authors and
+contributors, see AUTHORS.
+
+The ASCII art logo at the top was made using FIGlet (http://www.figlet.org/).
