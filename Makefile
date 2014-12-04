@@ -9,8 +9,8 @@ GIO_LIBS = $(shell $(PKG_CONFIG) --libs gio-2.0)
 SRCS = $(wildcard *.c)
 OBJS = $(SRCS:.c=.o)
 
-CFLAGS += -std=gnu99 -Wall -pedantic -fvisibility=hidden -fPIC
-LDFLAGS += -shared -fPIC
+CFLAGS += -std=gnu99 -Wall -pedantic -pthread -fvisibility=hidden -fPIC
+LDFLAGS += -pthread -shared -fPIC
 
 LIB = libsystemd-login.so.0
 
