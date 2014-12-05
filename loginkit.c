@@ -24,60 +24,29 @@
 
 #include <string.h>
 #include <errno.h>
-#include <pthread.h>
 
-#include <gio/gio.h>
-
+#include "bus.h"
 #include "loginkit.h"
-
-static pthread_mutex_t g_lock = PTHREAD_MUTEX_INITIALIZER;
-static GDBusConnection *g_bus = NULL;
-
-static GDBusConnection *get_bus(void)
-{
-	GError *error;
-
-	if (0 != pthread_mutex_lock(&g_lock))
-		return NULL;
-
-	if (NULL == g_bus) {
-		g_bus = g_bus_get_sync(G_BUS_TYPE_SYSTEM, NULL, &error);
-		if ((NULL == g_bus) && (NULL != error))
-			g_error_free(error);
-	}
-
-	(void) pthread_mutex_unlock(&g_lock);
-
-	return g_bus;
-}
-
-static void close_bus(void)
-{
-	if (0 != pthread_mutex_lock(&g_lock))
-		return;
-
-	(void) g_dbus_connection_close_sync(g_bus, NULL, NULL);
-	g_object_unref(g_bus);
-	g_bus = NULL;
-
-	(void) pthread_mutex_unlock(&g_lock);
-}
 
 __attribute__((destructor))
 static void on_dlclose(void)
 {
-	close_bus();
-	(void) pthread_mutex_destroy(&g_lock);
+	bus_close();
 }
 
 static char *get_session_by_pid(GDBusConnection *bus, pid_t pid)
 {
 	GVariant *reply;
-	GError *error = NULL;
-	char *ret = NULL;
+	GError *error;
+	char *ret;
 
 	if (0 == pid)
 		pid = getpid();
+
+	g_log(G_LOG_DOMAIN,
+	      G_LOG_LEVEL_INFO,
+	      "getting the session of process %ld",
+	      (long) pid);
 
 	reply = g_dbus_connection_call_sync(bus,
 	                                    "org.freedesktop.ConsoleKit",
@@ -106,7 +75,7 @@ int sd_pid_get_session_by_pid(pid_t pid, char **session)
 {
 	GDBusConnection *bus;
 
-	bus = get_bus();
+	bus = bus_get();
 	if (NULL == bus) {
 		*session = NULL;
 		return -EINVAL;
@@ -127,13 +96,15 @@ int sd_pid_get_owner_uid(pid_t pid, uid_t *uid)
 	GError *error = NULL;
 	char *session;
 
-	bus = get_bus();
+	bus = bus_get();
 	if (NULL == bus)
 		return -EINVAL;
 
 	session = get_session_by_pid(bus, pid);
 	if (NULL == session)
 		return -EINVAL;
+
+	g_log(G_LOG_DOMAIN, G_LOG_LEVEL_INFO, "getting the owner of %s", session);
 
 	reply = g_dbus_connection_call_sync(bus,
 	                                    "org.freedesktop.ConsoleKit",
@@ -168,13 +139,18 @@ int sd_pid_get_machine_name(pid_t pid, char **name)
 
 	*name = NULL;
 
-	bus = get_bus();
+	bus = bus_get();
 	if (NULL == bus)
 		return -EINVAL;
 
 	session = get_session_by_pid(bus, pid);
 	if (NULL == session)
 		return -EINVAL;
+
+	g_log(G_LOG_DOMAIN,
+	      G_LOG_LEVEL_INFO,
+	      "getting the hostname of %s",
+	      session);
 
 	reply = g_dbus_connection_call_sync(bus,
 	                                    "org.freedesktop.ConsoleKit",

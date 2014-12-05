@@ -3,13 +3,22 @@
 <node>
 	<interface name='org.freedesktop.login1.Manager'>
 		<method name='UnlockSession'>
-			<arg type='s' direction='in'/>
+			<arg type='s' name="id" direction='in'/>
 		</method>
 		<method name='ListSeats'>
-			<arg type='a(so)' direction='in'/>
+			<arg type='a(so)' name="seats" direction='out'/>
 		</method>
 		<method name='ActivateSessionOnSeat'>
-			<arg type='(ss)' direction='in'/>
+			<arg type='s' name="session" direction='in'/>
+			<arg type='s' name="seat" direction='in'/>
 		</method>
+		<signal name="SeatNew">
+			<arg type='s' name="id" direction='out'/>
+			<arg type='o' name="seat" direction='out'/>
+		</signal>
+		<signal name="SeatRemoved">
+			<arg type='s' name="id" direction='out'/>
+			<arg type='o' name="seat" direction='out'/>
+		</signal>
 	</interface>
 </node>

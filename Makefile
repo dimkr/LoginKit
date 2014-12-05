@@ -9,7 +9,13 @@ GIO_LIBS = $(shell $(PKG_CONFIG) --libs gio-2.0 gio-unix-2.0)
 SRCS = $(wildcard *.c)
 OBJS = $(SRCS:.c=.o)
 
-CFLAGS += -std=gnu99 -Wall -pedantic -pthread -fvisibility=hidden -fPIC
+CFLAGS += -std=gnu99 \
+          -Wall \
+          -pedantic \
+          -pthread \
+          -fvisibility=hidden \
+          -fPIC \
+          -DG_LOG_DOMAIN=\"LoginKit\"
 LDFLAGS += -pthread -fPIC
 
 LIB = libsystemd-login.so.0
@@ -27,11 +33,11 @@ loginkitd-generated.c: interface.xml
 	              --interface-prefix org.freedesktop.login1. \
 	              $^
 
-$(PROG): loginkitd-generated.o loginkitd.o
+$(PROG): bus.o loginkitd-generated.o loginkitd.o
 	$(CC) -o $@ $^ $(LDFLAGS) $(GIO_LIBS)
 
-$(LIB): loginkit.o
-	$(CC) -o $@ $^ -shared $(LDFLAGS) $(GIO_LIBS)
+$(LIB): bus.o loginkit.o compat.sym
+	$(CC) -o $@ bus.o loginkit.o  -shared $(LDFLAGS) $(GIO_LIBS) -Wl,--version-script=compat.sym
 
 clean:
 	rm -f $(PROG) loginkitd-generated.h loginkitd-generated.c $(LIB) $(OBJS)
