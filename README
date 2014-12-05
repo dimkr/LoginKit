@@ -17,6 +17,15 @@ It acts as a glue layer that exposes logind's interface, but uses ConsoleKit
 
 It's under heavy development and not ready for general use.
 
+Usage
+=====
+
+* compile
+* kill logind
+* run loginkitd
+* export LD_LIBRARY_PATH=$(pwd)
+* run GDM
+
 Credits and Legal Information
 =============================
 
