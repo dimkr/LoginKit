@@ -22,27 +22,20 @@
  * THE SOFTWARE.
  */
 
-#ifndef _LOGINKIT_H_INCLUDED
-#	define _LOGINKIT_H_INCLUDED
+#ifndef _SESSION_H_INCLUDED
+#	define _SESSION_H_INCLUDED
 
-#	include <sys/types.h>
+#	include "loginkitd-generated.h"
 
-int sd_pid_get_session(pid_t pid, char **session);
-int sd_pid_get_owner_uid(pid_t pid, uid_t *uid);
-int sd_pid_get_machine_name(pid_t pid, char **name);
-int sd_pid_get_unit(pid_t pid, char **unit);
-int sd_pid_get_user_unit(pid_t pid, char **unit);
-int sd_pid_get_slice(pid_t pid, char **slice);
+gboolean on_handle_unlock_session(LoginKitManager *interface,
+                                  GDBusMethodInvocation *invocation,
+                                  const gchar *id,
+                                  gpointer user_data);
 
-int sd_seat_can_multi_session(const char *seat);
-int sd_session_is_active(const char *session);
-int sd_session_get_state(const char *session, char **state);
-int sd_session_get_type(const char *session, char **type);
-int sd_session_get_seat(const char *session, char **seat);
-int sd_session_get_uid(const char *session, uid_t *uid);
-int sd_seat_get_sessions(const char *seat,
-                         char ***sessions,
-                         uid_t **uid,
-                         unsigned *n_uids);
+gboolean on_handle_activate_session_on_seat(LoginKitManager *interface,
+                                            GDBusMethodInvocation *invocation,
+                                            const gchar *arg_session,
+                                            const gchar *arg_seat,
+                                            gpointer user_data);
 
 #endif

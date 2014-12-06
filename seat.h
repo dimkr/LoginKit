@@ -22,27 +22,31 @@
  * THE SOFTWARE.
  */
 
-#ifndef _LOGINKIT_H_INCLUDED
-#	define _LOGINKIT_H_INCLUDED
+#ifndef _SEAT_H_INCLUDED
+#	define _SEAT_H_INCLUDED
 
-#	include <sys/types.h>
+#	include "loginkitd-generated.h"
 
-int sd_pid_get_session(pid_t pid, char **session);
-int sd_pid_get_owner_uid(pid_t pid, uid_t *uid);
-int sd_pid_get_machine_name(pid_t pid, char **name);
-int sd_pid_get_unit(pid_t pid, char **unit);
-int sd_pid_get_user_unit(pid_t pid, char **unit);
-int sd_pid_get_slice(pid_t pid, char **slice);
+char *get_seat_id(GDBusConnection *bus, const char *seat);
 
-int sd_seat_can_multi_session(const char *seat);
-int sd_session_is_active(const char *session);
-int sd_session_get_state(const char *session, char **state);
-int sd_session_get_type(const char *session, char **type);
-int sd_session_get_seat(const char *session, char **seat);
-int sd_session_get_uid(const char *session, uid_t *uid);
-int sd_seat_get_sessions(const char *seat,
-                         char ***sessions,
-                         uid_t **uid,
-                         unsigned *n_uids);
+gboolean on_handle_list_seats(LoginKitManager *interface,
+                              GDBusMethodInvocation *invocation,
+                              gpointer user_data);
+
+void on_seat_added(GDBusConnection *connection,
+                   const gchar *sender_name,
+                   const gchar *object_path,
+                   const gchar *interface_name,
+                   const gchar *signal_name,
+                   GVariant *parameters,
+                   gpointer user_data);
+
+void on_seat_removed(GDBusConnection *connection,
+                     const gchar *sender_name,
+                     const gchar *object_path,
+                     const gchar *interface_name,
+                     const gchar *signal_name,
+                     GVariant *parameters,
+                     gpointer user_data);
 
 #endif

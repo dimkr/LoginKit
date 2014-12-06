@@ -13,18 +13,32 @@ logind and libsystemd-login (http://www.freedesktop.org/wiki/Software/systemd),
 which does not depend on a specific init system.
 
 It acts as a glue layer that exposes logind's interface, but uses ConsoleKit
-(https://github.com/ConsoleKit2/ConsoleKit2) as a backend.
+(https://github.com/ConsoleKit2/ConsoleKit2) and UPower
+(http://upower.freedesktop.org/) as backends.
 
 It's under heavy development and not ready for general use.
+
+Dependencies
+============
+
+LoginKit requires GLib, PAM, ConsoleKit and UPower.
+
+Building
+========
+
+On Debian, install libpam0g-dev and libglib2.0-dev.
+
+To build LoginKit:
+  make
 
 Usage
 =====
 
-* compile
-* kill logind
-* run loginkitd
-* export LD_LIBRARY_PATH=$(pwd)
-* run GDM
+  - Kill systemd-logind
+  - Run loginkitd (quickly, before logind is restarted)
+  - Replace systemd's libsystemd-login.so.0 with LoginKit's one
+  - Add pam_loginkit.so to PAM's modules directory
+  - Replace "pam_systemd" with "pam_loginkit", in PAM's configuration
 
 Credits and Legal Information
 =============================

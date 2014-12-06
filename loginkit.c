@@ -194,3 +194,270 @@ int sd_pid_get_slice(pid_t pid, char **slice)
 {
 	return -EINVAL;
 }
+
+__attribute__((visibility("default")))
+int sd_seat_can_multi_session(const char *seat)
+{
+	/* let's assume very seat is multi-session, since there's no ConsoleKit
+	 * interface for this */
+	return 1;
+}
+
+__attribute__((visibility("default")))
+int sd_session_is_active(const char *session)
+{
+	GDBusConnection *bus;
+	GVariant *reply;
+	GError *error = NULL;
+	gboolean active;
+
+	g_log(G_LOG_DOMAIN,
+	      G_LOG_LEVEL_INFO,
+	      "checking whether %s is active",
+	      session);
+
+	bus = bus_get();
+	if (NULL == bus)
+		return -EINVAL;
+
+	reply = g_dbus_connection_call_sync(bus,
+	                                    "org.freedesktop.ConsoleKit",
+	                                    session,
+	                                    "org.freedesktop.ConsoleKit.Session",
+	                                    "IsActive",
+	                                    NULL,
+	                                    G_VARIANT_TYPE("(b)"),
+	                                    G_DBUS_CALL_FLAGS_NONE,
+	                                    -1,
+	                                    NULL,
+	                                    &error);
+	if (NULL == reply) {
+		if (NULL != error)
+			g_error_free(error);
+		return -EINVAL;
+	}
+
+	g_variant_get(reply, "(b)", &active);
+	g_variant_unref(reply);
+
+	if (FALSE == active)
+		return 0;
+
+	return 1;
+}
+
+__attribute__((visibility("default")))
+int sd_session_get_state(const char *session, char **state)
+{
+	int ret;
+
+	ret = sd_session_is_active(session);
+	switch (ret) {
+		case 0:
+			*state = strdup("online");
+			if (NULL == *state)
+				return -ENOMEM;
+			break;
+
+		case 1:
+			*state = strdup("active");
+			if (NULL == *state)
+				return -ENOMEM;
+			break;
+
+		default:
+			*state = NULL;
+			return ret;
+	}
+
+	return 0;
+}
+
+__attribute__((visibility("default")))
+int sd_session_get_type(const char *session, char **type)
+{
+	GDBusConnection *bus;
+	GVariant *reply;
+	GError *error = NULL;
+
+	g_log(G_LOG_DOMAIN, G_LOG_LEVEL_INFO, "getting the type of %s", session);
+
+	bus = bus_get();
+	if (NULL == bus)
+		return -EINVAL;
+
+	reply = g_dbus_connection_call_sync(bus,
+	                                    "org.freedesktop.ConsoleKit",
+	                                    session,
+	                                    "org.freedesktop.ConsoleKit.Session",
+	                                    "GetSessionType",
+	                                    NULL,
+	                                    G_VARIANT_TYPE("(s)"),
+	                                    G_DBUS_CALL_FLAGS_NONE,
+	                                    -1,
+	                                    NULL,
+	                                    &error);
+	if (NULL == reply) {
+		if (NULL != error)
+			g_error_free(error);
+		return -EINVAL;
+	}
+
+	g_variant_get(reply, "(s)", type);
+	g_variant_unref(reply);
+
+	*type = strdup(*type);
+	if (NULL == *type)
+		return -ENOMEM;
+
+	return 0;
+}
+
+__attribute__((visibility("default")))
+int sd_session_get_seat(const char *session, char **seat)
+{
+	GDBusConnection *bus;
+	GVariant *reply;
+	GError *error = NULL;
+
+	g_log(G_LOG_DOMAIN, G_LOG_LEVEL_INFO, "getting the seat of %s", session);
+
+	bus = bus_get();
+	if (NULL == bus)
+		return -EINVAL;
+
+	reply = g_dbus_connection_call_sync(bus,
+	                                    "org.freedesktop.ConsoleKit",
+	                                    session,
+	                                    "org.freedesktop.ConsoleKit.Session",
+	                                    "GetSeatId",
+	                                    NULL,
+	                                    G_VARIANT_TYPE("(o)"),
+	                                    G_DBUS_CALL_FLAGS_NONE,
+	                                    -1,
+	                                    NULL,
+	                                    &error);
+	if (NULL == reply) {
+		if (NULL != error)
+			g_error_free(error);
+		return -EINVAL;
+	}
+
+	g_variant_get(reply, "(o)", seat);
+	g_variant_unref(reply);
+
+	*seat = strdup(*seat);
+	if (NULL == *seat)
+		return -ENOMEM;
+
+	return 0;
+}
+
+__attribute__((visibility("default")))
+int sd_session_get_uid(const char *session, uid_t *uid)
+{
+	GDBusConnection *bus;
+	GVariant *reply;
+	GError *error = NULL;
+
+	g_log(G_LOG_DOMAIN, G_LOG_LEVEL_INFO, "getting the owner of %s", session);
+
+	bus = bus_get();
+	if (NULL == bus)
+		return -EINVAL;
+
+	reply = g_dbus_connection_call_sync(bus,
+	                                    "org.freedesktop.ConsoleKit",
+	                                    session,
+	                                    "org.freedesktop.ConsoleKit.Session",
+	                                    "GetUnixUser",
+	                                    NULL,
+	                                    G_VARIANT_TYPE("(u)"),
+	                                    G_DBUS_CALL_FLAGS_NONE,
+	                                    -1,
+	                                    NULL,
+	                                    &error);
+	if (NULL == reply) {
+		if (NULL != error)
+			g_error_free(error);
+		return -EINVAL;
+	}
+
+	g_variant_get(reply, "(u)", uid);
+	g_variant_unref(reply);
+
+	return 0;
+}
+
+__attribute__((visibility("default")))
+int sd_seat_get_sessions(const char *seat,
+                         char ***sessions,
+                         uid_t **uid,
+                         unsigned *n_uids)
+{
+	GVariantIter iter;
+	GVariant *array;
+	char *session;
+	GDBusConnection *bus;
+	GVariant *reply;
+	GError *error = NULL;
+	uid_t owner;
+	int ret = -EINVAL;
+	unsigned i;
+
+	g_log(G_LOG_DOMAIN, G_LOG_LEVEL_INFO, "listing the sessions on %s", seat);
+
+	bus = bus_get();
+	if (NULL == bus)
+		goto end;
+
+	reply = g_dbus_connection_call_sync(bus,
+	                                    "org.freedesktop.ConsoleKit",
+	                                    seat,
+	                                    "org.freedesktop.ConsoleKit.Seat",
+	                                    "GetSessions",
+	                                    NULL,
+	                                    G_VARIANT_TYPE("(ao)"),
+	                                    G_DBUS_CALL_FLAGS_NONE,
+	                                    -1,
+	                                    NULL,
+	                                    &error);
+	if (NULL == reply) {
+		if (NULL != error)
+			g_error_free(error);
+		goto end;
+	}
+
+	array = g_variant_get_child_value(reply, 0);
+	g_variant_iter_init(&iter, array);
+
+	*n_uids = (unsigned) g_variant_iter_n_children(&iter);
+	*sessions = g_new(char *, 1 + (*n_uids));
+	*uid = g_new(uid_t, *n_uids);
+
+	for (i = 0; (*n_uids) > i; ++i) {
+		(void) g_variant_iter_loop(&iter, "o", &session, NULL);
+		ret = sd_session_get_uid(session, &owner);
+		if (0 != ret) {
+			g_free(*sessions);
+			g_free(*uid);
+			*sessions = NULL;
+			*uid = NULL;
+			break;
+		}
+
+		*sessions[i] = session;
+		*uid[i] = owner;
+	}
+
+	ret = 0;
+
+	/* the session IDs array must have a terminating NULL sentinel */
+	sessions[i] = NULL;
+
+	g_variant_unref(reply);
+	g_variant_unref(array);
+
+end:
+	return ret;
+}

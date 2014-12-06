@@ -36,7 +36,7 @@ loginkitd-generated.c: interface.xml
 	              --interface-prefix org.freedesktop.login1. \
 	              $^
 
-$(PROG): bus.o loginkitd-generated.o loginkitd.o
+$(PROG): bus.o loginkitd-generated.o seat.o session.o power.o loginkitd.o
 	$(CC) -o $@ $^ $(LDFLAGS) $(GIO_LIBS)
 
 $(LIB): bus.o loginkit.o compat.sym
