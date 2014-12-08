@@ -71,7 +71,7 @@ static char *get_session_by_pid(GDBusConnection *bus, pid_t pid)
 }
 
 __attribute__((visibility("default")))
-int sd_pid_get_session_by_pid(pid_t pid, char **session)
+int sd_pid_get_session(pid_t pid, char **session)
 {
 	GDBusConnection *bus;
 
@@ -185,12 +185,6 @@ int sd_pid_get_unit(pid_t pid, char **unit)
 
 __attribute__((visibility("default")))
 int sd_pid_get_user_unit(pid_t pid, char **unit)
-{
-	return -EINVAL;
-}
-
-__attribute__((visibility("default")))
-int sd_pid_get_slice(pid_t pid, char **slice)
 {
 	return -EINVAL;
 }

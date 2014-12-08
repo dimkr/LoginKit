@@ -206,3 +206,10 @@ end:
 	return ret;
 }
 
+gboolean on_handle_get_session(LoginKitManager *interface,
+                               GDBusMethodInvocation *invocation,
+                               const gchar *arg_ssid,
+                               gpointer user_data)
+{
+	login_kit_manager_complete_get_session(interface, invocation, arg_ssid);
+}

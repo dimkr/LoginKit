@@ -38,4 +38,9 @@ gboolean on_handle_activate_session_on_seat(LoginKitManager *interface,
                                             const gchar *arg_seat,
                                             gpointer user_data);
 
+gboolean on_handle_get_session(LoginKitManager *interface,
+                               GDBusMethodInvocation *invocation,
+                               const gchar *arg_ssid,
+                               gpointer user_data);
+
 #endif

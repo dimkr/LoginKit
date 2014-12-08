@@ -36,6 +36,10 @@
 			<arg type='s' name="id" direction='in'/>
 			<arg type='s' name="seat" direction='in'/>
 		</method>
+		<method name="GetSession">
+			<arg type="s" name="id" direction="in" />
+			<arg type="o" name="session" direction="out" />
+		</method>
 
 		<!-- power management -->
 		<method name='CanSuspend'>

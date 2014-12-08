@@ -86,6 +86,10 @@ static void on_bus_acquired(GDBusConnection *bus,
 	                 "handle-activate-session-on-seat",
 	                 G_CALLBACK(on_handle_activate_session_on_seat),
 	                 NULL);
+	g_signal_connect(interface,
+	                 "handle-get-session",
+	                 G_CALLBACK(on_handle_get_session),
+	                 NULL);
 
 	g_signal_connect(interface,
 	                 "handle-can-hybrid-sleep",
