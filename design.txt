@@ -1,0 +1,108 @@
+Upstream Documentation
+======================
+
+Before you read this documentation, skim logind's documentation and make sure
+you're familiar with the idea of IPC via D-Bus:
+  - http://www.freedesktop.org/wiki/Software/systemd/multiseat/
+  - http://www.freedesktop.org/wiki/Software/systemd/logind/
+  - http://www.freedesktop.org/software/systemd/man/sd-login.html
+  - http://www.freedesktop.org/wiki/Software/dbus/
+
+Also, some history:
+  - http://www.freedesktop.org/wiki/Software/ConsoleKit/
+  - http://upower.freedesktop.org/
+
+Method Calls Over D-Bus
+=======================
+
+In addition to IPC, D-Bus also takes care of LPC (Local Procedure Call). It
+allows an application to implement a method callable by others. In fact,
+several of systemd's major components are daemons that export methods through
+D-Bus; logind is one of them.
+
+This is extremely useful for daemons which provide information to other
+applications: for example, a file indexing daemon which provides a quick file
+search API. Thanks to D-Bus methods, file indexing happens just once (in the
+daemon), while applications do not perform any heavy initialization, in contrast
+to the traditional library-based approach (e.g every application that uses
+libmagic calls magic_open()). The heavy use of D-Bus in systemd improves the
+overall efficiency of operations handled by libraries in the past.
+
+logind
+======
+
+Most of logind's functionality is implemented in a daemon, systemd-logind. This
+daemon exposes a rich API, over D-Bus. This API is used to query information
+about seats and sessions, set up new sessions and more.
+
+libsystemd-login
+================
+
+For some reason, some session management and multi-seat support functionality
+is not provided of the daemon. Instead, it is implemented as a library,
+libsystemd-login. For example, the interface for creation of sessions is the
+CreateSession() D-Bus method, but the interface for querying of the remote
+hostname of a session is the sd_pid_get_machine_name() function provided by
+libsystemd-login.
+
+The libsystemd-login man page tries to explain this inconsistency:
+  "Note that these APIs only allow purely passive access and monitoring of seats,
+   sessions and users. To actively make changes to the seat configuration,
+   terminate login sessions, or switch session on a seat you need to utilize the
+   D-Bus API of systemd-logind, instead.
+
+   These functions synchronously access data in /proc, /sys/fs/cgroup and /run.
+   All of these are virtual file systems, hence the runtime cost of the accesses
+   is relatively cheap."
+
+This does not make much sense, because:
+  - The D-Bus API contains many information querying functions too.
+  - It's possible to use the D-Bus API without making any changes.
+  - If the libsystemd-login functions are "cheap" just because they access
+    virtual (e.g RAM-backed) file systems, querying the daemon via the D-Bus
+    API should be even cheaper (because of reduced system call overhead).
+  - The daemon has to export its data to those virtual file systems, so this API
+    makes the daemon slower as well.
+
+Having a file-based information querying API is nice to have, but only if it's
+the only API.
+
+pam_systemd
+===========
+
+In addition to these two API sets (the D-Bus one and the library), logind
+provides several environment variables (XDG_*) that display managers and desktop
+applications rely on (for example, the session type). Therefore, systemd
+includes a PAM module (pam_systemd), which hooks the user authentication
+process.
+
+When a user logs in, this module:
+  - Calls logind's CreateSession() D-Bus method, to register a new session
+  - Creates the XDG_* environment variables
+
+When the user logs out, pam_systemd closes the session via the ReleaseSession()
+D-Bus method.
+
+This way, applications executed by the user and display managers do not have to
+create and close a logind session. pam_systemd makes session handling
+transparent, if the user logs in via a PAM-based mechanism.
+
+logind vs. ConsoleKit
+=====================
+
+logind and ConsoleKit are extremely similar: logind is basically a superset of
+ConsoleKit's D-Bus API (e.g ListSessions() is similar to GetSessions(), but
+Inhibit() is missing).
+
+However, ConsoleKit is deprecated and lacks true multi-seat support. Its fork
+(ConsoleKit2) tries to address this issue, among others. It already implements
+some of the missing logind functionality, so it's a promising path forward.
+
+logind vs. UPower
+=================
+
+In addition to session management and multi-seat support, logind also handles
+some aspects of power management and deprecates UPower. Sadly, UPower lacks
+equivalents for many logind APIs (i.e the return value CanSuspend() is
+different) and does not handle permissions (e.g permission to suspend the
+machine).
