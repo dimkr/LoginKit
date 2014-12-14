@@ -27,61 +27,24 @@
 #include "bus.h"
 #include "power.h"
 
-void on_handle_can_hybrid_sleep(LoginKitManager *interface,
-                                GDBusMethodInvocation *invocation,
-                                const gchar *can,
-                                gpointer user_data)
-{
-	/* UPower does not support hybrid sleep */
-	g_log(G_LOG_DOMAIN,
-	      G_LOG_LEVEL_INFO,
-	      "checking whether hybrid sleep is supported");
-	login_kit_manager_complete_can_hybrid_sleep(interface, invocation, "na");
-}
-
-void on_handle_can_power_off(LoginKitManager *interface,
-                             GDBusMethodInvocation *invocation,
-                             const gchar *can,
-                             gpointer user_data)
-{
-	/* UPower does not have an equivalent method */
-	g_log(G_LOG_DOMAIN,
-	      G_LOG_LEVEL_INFO,
-	      "checking whether shutdown is supported");
-	login_kit_manager_complete_can_power_off(interface, invocation, "yes");
-}
-
-void on_handle_can_reboot(LoginKitManager *interface,
-                          GDBusMethodInvocation *invocation,
-                          const gchar *can,
-                          gpointer user_data)
-{
-	g_log(G_LOG_DOMAIN,
-	      G_LOG_LEVEL_INFO,
-	      "checking whether reboot is supported");
-
-	login_kit_manager_complete_can_reboot(interface, invocation, "yes");
-}
-
-static char *power_can(const char *can_method, const char *allowed_method)
+static char *handle_can(const char *method)
 {
 	GDBusConnection *bus;
 	GVariant *reply;
 	GError *error = NULL;
-	gboolean result;
-	char *ret = "na";
+	char *ret;
 
 	bus = bus_get();
 	if (NULL == bus)
-		goto end;
+		return NULL;
 
 	reply = g_dbus_connection_call_sync(bus,
-	                                    "org.freedesktop.UPower",
-	                                    "/org/freedesktop/UPower",
-	                                    "org.freedesktop.UPower",
-	                                    can_method,
+	                                    "org.freedesktop.ConsoleKit",
+	                                    "/org/freedesktop/ConsoleKit/Manager",
+	                                    "org.freedesktop.ConsoleKit.Manager",
+	                                    method,
 	                                    NULL,
-	                                    G_VARIANT_TYPE("(b)"),
+	                                    G_VARIANT_TYPE("(s)"),
 	                                    G_DBUS_CALL_FLAGS_NONE,
 	                                    -1,
 	                                    NULL,
@@ -89,70 +52,271 @@ static char *power_can(const char *can_method, const char *allowed_method)
 	if (NULL == reply) {
 		if (NULL != error)
 			g_error_free(error);
-		goto end;
+		return NULL;
 	}
 
-	g_variant_get(reply, "(b)", &result);
+	g_variant_get(reply, "(s)", &ret);
 	g_variant_unref(reply);
 
-	if (FALSE == result) {
-		ret = "no";
-		goto end;
-	}
-
-	reply = g_dbus_connection_call_sync(bus,
-	                                    "org.freedesktop.UPower",
-	                                    "/org/freedesktop/UPower",
-	                                    "org.freedesktop.UPower",
-	                                    allowed_method,
-	                                    NULL,
-	                                    G_VARIANT_TYPE("(b)"),
-	                                    G_DBUS_CALL_FLAGS_NONE,
-	                                    -1,
-	                                    NULL,
-	                                    &error);
-	if (NULL == reply) {
-		if (NULL != error)
-			g_error_free(error);
-		goto end;
-	}
-
-	g_variant_get(reply, "(b)", &result);
-	g_variant_unref(reply);
-
-	if (FALSE == result)
-		ret = "challenge";
-	else
-		ret = "yes";
-
-end:
 	return ret;
 }
 
-void on_handle_can_suspend(LoginKitManager *interface,
-                           GDBusMethodInvocation *invocation,
-                           const gchar *can,
-                           gpointer user_data)
+gboolean on_handle_can_hybrid_sleep(LoginKitManager *interface,
+                                    GDBusMethodInvocation *invocation,
+                                    const gchar *can,
+                                    gpointer user_data)
 {
+	char *ret;
+
+	g_log(G_LOG_DOMAIN,
+	      G_LOG_LEVEL_INFO,
+	      "checking whether hybrid sleep is supported");
+
+	ret = handle_can("CanHybridSleep");
+	if (NULL == ret)
+		return FALSE;
+
+	login_kit_manager_complete_can_hybrid_sleep(interface, invocation, ret);
+	return TRUE;
+}
+
+gboolean on_handle_can_power_off(LoginKitManager *interface,
+                                 GDBusMethodInvocation *invocation,
+                                 const gchar *can,
+                                 gpointer user_data)
+{
+	char *ret;
+
+	g_log(G_LOG_DOMAIN,
+	      G_LOG_LEVEL_INFO,
+	      "checking whether shutdown is supported");
+
+	ret = handle_can("CanPowerOff");
+	if (NULL == ret)
+		return FALSE;
+
+	login_kit_manager_complete_can_power_off(interface, invocation, ret);
+	return TRUE;
+}
+
+gboolean on_handle_can_reboot(LoginKitManager *interface,
+                              GDBusMethodInvocation *invocation,
+                              const gchar *can,
+                              gpointer user_data)
+{
+	char *ret;
+
+	g_log(G_LOG_DOMAIN,
+	      G_LOG_LEVEL_INFO,
+	      "checking whether reboot is supported");
+
+	ret = handle_can("CanReboot");
+	if (NULL == ret)
+		return FALSE;
+
+	login_kit_manager_complete_can_reboot(interface, invocation, ret);
+	return TRUE;
+}
+
+gboolean on_handle_can_suspend(LoginKitManager *interface,
+                               GDBusMethodInvocation *invocation,
+                               const gchar *can,
+                               gpointer user_data)
+{
+	char *ret;
+
 	g_log(G_LOG_DOMAIN,
 	      G_LOG_LEVEL_INFO,
 	      "checking whether suspending is supported");
-	login_kit_manager_complete_can_suspend(interface,
-	                                       invocation,
-	                                       power_can("CanSuspend",
-	                                                 "SuspendAllowed"));
+
+	ret = handle_can("CanSuspend");
+	if (NULL == ret)
+		return FALSE;
+
+	login_kit_manager_complete_can_suspend(interface, invocation, ret);
+	return TRUE;
 }
 
-void on_handle_can_hibernate(LoginKitManager *interface,
-                             GDBusMethodInvocation *invocation,
-                             const gchar *can,
-                             gpointer user_data)
+gboolean on_handle_can_hibernate(LoginKitManager *interface,
+                                 GDBusMethodInvocation *invocation,
+                                 const gchar *can,
+                                 gpointer user_data)
 {
+	char *ret;
+
 	g_log(G_LOG_DOMAIN,
 	      G_LOG_LEVEL_INFO,
 	      "checking whether hibernation is supported");
-	login_kit_manager_complete_can_hibernate(interface,
-	                                         invocation,
-	                                         power_can("CanHibernate",
-	                                                   "HibernateAllowed"));
+
+	ret = handle_can("CanHibernate");
+	if (NULL == ret)
+		return FALSE;
+
+	login_kit_manager_complete_can_hibernate(interface, invocation, ret);
+	return TRUE;
+}
+
+gboolean on_handle_inhibit(LoginKitManager *interface,
+                           GDBusMethodInvocation *invocation,
+                           const gchar *arg_what,
+                           const gchar *arg_who,
+                           const gchar *arg_why,
+                           const gchar *arg_mode,
+                           GVariant **fd,
+                           gpointer user_data)
+{
+	GDBusConnection *bus;
+	GVariant *reply;
+	GError *error = NULL;
+	gint ret = (-1);
+
+	g_log(G_LOG_DOMAIN,
+	      G_LOG_LEVEL_INFO,
+	      "inhibiting %s for %s",
+	      arg_what,
+	      arg_who);
+
+	bus = bus_get();
+	if (NULL == bus)
+		return FALSE;
+
+	reply = g_dbus_connection_call_sync(bus,
+	                                    "org.freedesktop.ConsoleKit",
+	                                    "/org/freedesktop/ConsoleKit/Manager",
+	                                    "org.freedesktop.ConsoleKit.Manager",
+	                                    "Inhibit",
+	                                    g_variant_new("(sss)",
+	                                                  arg_what,
+	                                                  arg_who,
+	                                                  arg_why),
+	                                    G_VARIANT_TYPE("(h)"),
+	                                    G_DBUS_CALL_FLAGS_NONE,
+	                                    -1,
+	                                    NULL,
+	                                    &error);
+	if (NULL == reply) {
+		if (NULL != error)
+			g_error_free(error);
+		return FALSE;
+	}
+
+	g_variant_get(reply, "(h)", &ret);
+	g_variant_unref(reply);
+
+	login_kit_manager_complete_inhibit(interface,
+	                                   invocation,
+	                                   g_variant_new("(h)", ret));
+	return TRUE;
+}
+
+static gboolean handle_action(const char *method, const gboolean interactive)
+{
+	GDBusConnection *bus;
+	GVariant *reply;
+	GError *error = NULL;
+
+	bus = bus_get();
+	if (NULL == bus)
+		return FALSE;
+
+	reply = g_dbus_connection_call_sync(bus,
+	                                    "org.freedesktop.ConsoleKit",
+	                                    "/org/freedesktop/ConsoleKit/Manager",
+	                                    "org.freedesktop.ConsoleKit.Manager",
+	                                    method,
+	                                    g_variant_new("(b)", interactive),
+	                                    NULL,
+	                                    G_DBUS_CALL_FLAGS_NONE,
+	                                    -1,
+	                                    NULL,
+	                                    &error);
+	if (NULL == reply) {
+		if (NULL != error)
+			g_error_free(error);
+		return FALSE;
+	}
+
+	g_variant_unref(reply);
+
+	return TRUE;
+}
+
+gboolean on_handle_suspend(LoginKitManager *interface,
+                           GDBusMethodInvocation *invocation,
+                           const gboolean arg_interactive,
+                           gpointer user_data)
+{
+	gboolean ret;
+
+	g_log(G_LOG_DOMAIN, G_LOG_LEVEL_INFO, "Suspending");
+
+	ret = handle_action("Suspend", arg_interactive);
+	if (TRUE == ret)
+		login_kit_manager_complete_suspend(interface, invocation);
+
+	return ret;
+}
+
+gboolean on_handle_hybrid_sleep(LoginKitManager *interface,
+                                GDBusMethodInvocation *invocation,
+                                const gboolean arg_interactive,
+                                gpointer user_data)
+{
+	gboolean ret;
+
+	g_log(G_LOG_DOMAIN, G_LOG_LEVEL_INFO, "Entering hybrid sleep");
+
+	ret = handle_action("HybridSleep", arg_interactive);
+	if (TRUE == ret)
+		login_kit_manager_complete_hybrid_sleep(interface, invocation);
+
+	return ret;
+}
+
+gboolean on_handle_power_off(LoginKitManager *interface,
+                             GDBusMethodInvocation *invocation,
+                             const gboolean arg_interactive,
+                             gpointer user_data)
+{
+	gboolean ret;
+
+	g_log(G_LOG_DOMAIN, G_LOG_LEVEL_INFO, "Shutting down");
+
+	ret = handle_action("PowerOff", arg_interactive);
+	if (TRUE == ret)
+		login_kit_manager_complete_suspend(interface, invocation);
+
+	return ret;
+}
+
+gboolean on_handle_reboot(LoginKitManager *interface,
+                          GDBusMethodInvocation *invocation,
+                          const gboolean arg_interactive,
+                          gpointer user_data)
+{
+	gboolean ret;
+
+	g_log(G_LOG_DOMAIN, G_LOG_LEVEL_INFO, "Rebooting");
+
+	ret = handle_action("Reboot", arg_interactive);
+	if (TRUE == ret)
+		login_kit_manager_complete_suspend(interface, invocation);
+
+	return ret;
+}
+
+gboolean on_handle_hibernate(LoginKitManager *interface,
+                             GDBusMethodInvocation *invocation,
+                             const gboolean arg_interactive,
+                             gpointer user_data)
+{
+	gboolean ret;
+
+	g_log(G_LOG_DOMAIN, G_LOG_LEVEL_INFO, "Hibernating");
+
+	ret = handle_action("Hibernate", arg_interactive);
+	if (TRUE == ret)
+		login_kit_manager_complete_suspend(interface, invocation);
+
+	return ret;
 }

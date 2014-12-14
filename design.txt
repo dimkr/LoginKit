@@ -106,3 +106,6 @@ some aspects of power management and deprecates UPower. Sadly, UPower lacks
 equivalents for many logind APIs (i.e the return value CanSuspend() is
 different) and does not handle permissions (e.g permission to suspend the
 machine).
+
+Luckily, ConsoleKit2 enhances ConsoleKit with support for permission checks, via
+polkit. It mirrors the logind power management API perfectly.

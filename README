@@ -13,15 +13,14 @@ logind and libsystemd-login (http://www.freedesktop.org/wiki/Software/systemd),
 which does not depend on a specific init system.
 
 It acts as a glue layer that exposes logind's interface, but uses ConsoleKit
-(https://github.com/ConsoleKit2/ConsoleKit2) and UPower
-(http://upower.freedesktop.org/) as backends.
+(https://github.com/ConsoleKit2/ConsoleKit2) as a backend.
 
 It's under heavy development and not ready for general use.
 
 Dependencies
 ============
 
-LoginKit requires GLib, PAM, ConsoleKit and UPower.
+LoginKit requires GLib, PAM and ConsoleKit2.
 
 Building
 ========

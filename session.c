@@ -212,4 +212,5 @@ gboolean on_handle_get_session(LoginKitManager *interface,
                                gpointer user_data)
 {
 	login_kit_manager_complete_get_session(interface, invocation, arg_ssid);
+	return TRUE;
 }

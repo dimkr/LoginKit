@@ -36,6 +36,7 @@
 #include <security/pam_modules.h>
 #include <security/pam_misc.h>
 #include <security/pam_ext.h>
+#include <security/pam_modutil.h>
 
 #include "bus.h"
 
@@ -46,6 +47,7 @@ int pam_sm_open_session(pam_handle_t *pamh,
                         const char **argv)
 {
 	char path[PATH_MAX];
+	GVariantBuilder builder;
 	GDBusConnection *bus;
 	GVariant *reply;
 	GError *error = NULL;
@@ -53,23 +55,40 @@ int pam_sm_open_session(pam_handle_t *pamh,
 	char *seat;
 	char *type;
 	char *cookie;
-	uid_t owner;
+	const char *user;
+	struct passwd *passwd;
 	int len;
 
-	pam_syslog(pamh, LOG_DEBUG, "opening a session for %ld", (long) getpid());
+	/* get the user name */
+	if (PAM_SUCCESS != pam_get_user(pamh, &user, NULL))
+		goto failure;
+
+	pam_syslog(pamh, LOG_DEBUG, "opening a session for %s", user);
+
+	/* get the user ID */
+	passwd = pam_modutil_getpwnam(pamh, user);
+	if (NULL == passwd)
+		goto failure;
 
 	/* connect to the bus */
 	bus = bus_get();
 	if (NULL == bus)
 		goto failure;
 
-	/* start a ConsoleKit session and obtain a session cookie */
+	/* start a ConsoleKit session for the user and and obtain a session
+	 * cookie */
+	g_variant_builder_init(&builder, G_VARIANT_TYPE ("(a(sv))"));
+	g_variant_builder_open(&builder, G_VARIANT_TYPE ("a(sv)"));
+	g_variant_builder_add(&builder,
+	                      "(sv)",
+	                      "unix-user",
+	                      g_variant_new_int32(passwd->pw_uid));
 	reply = g_dbus_connection_call_sync(bus,
 	                                    "org.freedesktop.ConsoleKit",
 	                                    "/org/freedesktop/ConsoleKit/Manager",
 	                                    "org.freedesktop.ConsoleKit.Manager",
-	                                    "OpenSession",
-	                                    NULL,
+	                                    "OpenSessionWithParameters",
+	                                    g_variant_builder_end(&builder),
 	                                    G_VARIANT_TYPE("(s)"),
 	                                    G_DBUS_CALL_FLAGS_NONE,
 	                                    -1,
@@ -163,29 +182,11 @@ int pam_sm_open_session(pam_handle_t *pamh,
 	if (PAM_SUCCESS != pam_misc_setenv(pamh, "XDG_SESSION_TYPE", type, 0))
 		goto close_session;
 
-	/* get the user ID of the session owner */
-	reply = g_dbus_connection_call_sync(bus,
-	                                    "org.freedesktop.ConsoleKit",
-	                                    session,
-	                                    "org.freedesktop.ConsoleKit.Session",
-	                                    "GetUnixUser",
-	                                    NULL,
-	                                    G_VARIANT_TYPE("(u)"),
-	                                    G_DBUS_CALL_FLAGS_NONE,
-	                                    -1,
-	                                    NULL,
-	                                    &error);
-	if (NULL == reply) {
-		if (NULL != error)
-			g_error_free(error);
-		goto close_session;
-	}
-
-	g_variant_get(reply, "(u)", &owner);
-	g_variant_unref(reply);
-
 	/* create a temporary directory for the user under /run/user */
-	len = snprintf(path, sizeof(path), "/run/user/%d", (unsigned int) owner);
+	len = snprintf(path,
+	               sizeof(path),
+	               "/run/user/%d",
+	               (unsigned int) passwd->pw_uid);
 	if ((0 >= len) || (sizeof(path) <= len))
 		goto close_session;
 
@@ -238,8 +239,6 @@ int pam_sm_close_session(pam_handle_t *pamh,
 	const char *cookie;
 	gboolean closed;
 	int ret;
-
-	pam_syslog(pamh, LOG_DEBUG, "closing a session for %ld", (long) getpid());
 
 	/* get the session cookie from the XDG_SESSION_COOKIE environment
 	 * variable created by pam_sm_open_session() */

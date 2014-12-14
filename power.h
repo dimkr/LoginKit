@@ -27,29 +27,63 @@
 
 #	include "loginkitd-generated.h"
 
-void on_handle_can_hybrid_sleep(LoginKitManager *interface,
-                                GDBusMethodInvocation *invocation,
-                                const gchar *can,
-                                gpointer user_data);
+gboolean on_handle_can_hybrid_sleep(LoginKitManager *interface,
+                                    GDBusMethodInvocation *invocation,
+                                    const gchar *can,
+                                    gpointer user_data);
 
-void on_handle_can_power_off(LoginKitManager *interface,
-                             GDBusMethodInvocation *invocation,
-                             const gchar *can,
-                             gpointer user_data);
+gboolean on_handle_can_power_off(LoginKitManager *interface,
+                                 GDBusMethodInvocation *invocation,
+                                 const gchar *can,
+                                 gpointer user_data);
 
-void on_handle_can_reboot(LoginKitManager *interface,
-                          GDBusMethodInvocation *invocation,
-                          const gchar *can,
-                          gpointer user_data);
+gboolean on_handle_can_reboot(LoginKitManager *interface,
+                              GDBusMethodInvocation *invocation,
+                              const gchar *can,
+                              gpointer user_data);
 
-void on_handle_can_suspend(LoginKitManager *interface,
+gboolean on_handle_can_suspend(LoginKitManager *interface,
+                               GDBusMethodInvocation *invocation,
+                               const gchar *can,
+                               gpointer user_data);
+
+gboolean on_handle_can_hibernate(LoginKitManager *interface,
+                                 GDBusMethodInvocation *invocation,
+                                 const gchar *can,
+                                 gpointer user_data);
+
+gboolean on_handle_inhibit(LoginKitManager *interface,
                            GDBusMethodInvocation *invocation,
-                           const gchar *can,
+                           const gchar *arg_what,
+                           const gchar *arg_who,
+                           const gchar *arg_why,
+                           const gchar *arg_mode,
+                           GVariant **fd,
                            gpointer user_data);
 
-void on_handle_can_hibernate(LoginKitManager *interface,
+gboolean on_handle_suspend(LoginKitManager *interface,
+                           GDBusMethodInvocation *invocation,
+                           const gboolean arg_interactive,
+                           gpointer user_data);
+
+gboolean on_handle_hybrid_sleep(LoginKitManager *interface,
+                                GDBusMethodInvocation *invocation,
+                                const gboolean arg_interactive,
+                                gpointer user_data);
+
+gboolean on_handle_power_off(LoginKitManager *interface,
                              GDBusMethodInvocation *invocation,
-                             const gchar *can,
+                             const gboolean arg_interactive,
+                             gpointer user_data);
+
+gboolean on_handle_reboot(LoginKitManager *interface,
+                          GDBusMethodInvocation *invocation,
+                          const gboolean arg_interactive,
+                          gpointer user_data);
+
+gboolean on_handle_hibernate(LoginKitManager *interface,
+                             GDBusMethodInvocation *invocation,
+                             const gboolean arg_interactive,
                              gpointer user_data);
 
 #endif

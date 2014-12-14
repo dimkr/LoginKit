@@ -111,6 +111,34 @@ static void on_bus_acquired(GDBusConnection *bus,
 	                 "handle-can-hibernate",
 	                 G_CALLBACK(on_handle_can_hibernate),
 	                 NULL);
+	g_signal_connect(interface,
+	                 "handle-inhibit",
+	                 G_CALLBACK(on_handle_inhibit),
+	                 NULL);
+	g_signal_connect(interface,
+	                 "handle-suspend",
+	                 G_CALLBACK(on_handle_suspend),
+	                 NULL);
+	g_signal_connect(interface,
+	                 "handle-suspend",
+	                 G_CALLBACK(on_handle_suspend),
+	                 NULL);
+	g_signal_connect(interface,
+	                 "handle-hybrid-sleep",
+	                 G_CALLBACK(on_handle_hybrid_sleep),
+	                 NULL);
+	g_signal_connect(interface,
+	                 "handle-power-off",
+	                 G_CALLBACK(on_handle_power_off),
+	                 NULL);
+	g_signal_connect(interface,
+	                 "handle-reboot",
+	                 G_CALLBACK(on_handle_reboot),
+	                 NULL);
+	g_signal_connect(interface,
+	                 "handle-hibernate",
+	                 G_CALLBACK(on_handle_hibernate),
+	                 NULL);
 
 	signals_subscribe(interface);
 

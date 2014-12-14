@@ -27,14 +27,14 @@
 	<interface name='org.freedesktop.login1.Manager'>
 		<!-- methods -->
 		<method name='UnlockSession'>
-			<arg type='s' name="id" direction='in'/>
+			<arg type='s' name="id" direction="in"/>
 		</method>
 		<method name='ListSeats'>
-			<arg type='a(so)' name="seats" direction='out'/>
+			<arg type='a(so)' name="seats" direction="out"/>
 		</method>
 		<method name='ActivateSessionOnSeat'>
-			<arg type='s' name="id" direction='in'/>
-			<arg type='s' name="seat" direction='in'/>
+			<arg type='s' name="id" direction="in"/>
+			<arg type='s' name="seat" direction="in"/>
 		</method>
 		<method name="GetSession">
 			<arg type="s" name="id" direction="in" />
@@ -43,29 +43,51 @@
 
 		<!-- power management -->
 		<method name='CanSuspend'>
-			<arg type='s' name="can" direction='out'/>
+			<arg type='s' name="can" direction="out"/>
 		</method>
 		<method name='CanHybridSleep'>
-			<arg type='s' name="can" direction='out'/>
+			<arg type='s' name="can" direction="out"/>
 		</method>
 		<method name='CanPowerOff'>
-			<arg type='s' name="can" direction='out'/>
+			<arg type='s' name="can" direction="out"/>
 		</method>
 		<method name='CanReboot'>
-			<arg type='s' name="can" direction='out'/>
+			<arg type='s' name="can" direction="out"/>
 		</method>
 		<method name='CanHibernate'>
-			<arg type='s' name="can" direction='out'/>
+			<arg type='s' name="can" direction="out"/>
+		</method>
+		<method name='Inhibit'>
+			<arg type='s' name="what" direction="in"/>
+			<arg type='s' name="who" direction="in"/>
+			<arg type='s' name="why" direction="in"/>
+			<arg type='s' name="mode" direction="in"/>
+			<arg type='h' name="fd" direction="out"/>
+		</method>
+		<method name='Suspend'>
+			<arg type='b' name="interactive" direction="in"/>
+		</method>
+		<method name='HybridSleep'>
+			<arg type='b' name="interactive" direction="in"/>
+		</method>
+		<method name='PowerOff'>
+			<arg type='b' name="interactive" direction="in"/>
+		</method>
+		<method name='Reboot'>
+			<arg type='b' name="interactive" direction="in"/>
+		</method>
+		<method name='Hibernate'>
+			<arg type='b' name="interactive" direction="in"/>
 		</method>
 
 		<!-- signals -->
 		<signal name="SeatNew">
-			<arg type='s' name="id" direction='out'/>
-			<arg type='o' name="seat" direction='out'/>
+			<arg type='s' name="id" direction="out"/>
+			<arg type='o' name="seat" direction="out"/>
 		</signal>
 		<signal name="SeatRemoved">
-			<arg type='s' name="id" direction='out'/>
-			<arg type='o' name="seat" direction='out'/>
+			<arg type='s' name="id" direction="out"/>
+			<arg type='o' name="seat" direction="out"/>
 		</signal>
 	</interface>
 </node>
