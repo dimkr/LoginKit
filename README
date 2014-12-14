@@ -12,7 +12,7 @@ LoginKit is an attempt to implement a compatible, yet standalone alternative to
 logind and libsystemd-login (http://www.freedesktop.org/wiki/Software/systemd),
 which does not depend on a specific init system.
 
-It acts as a glue layer that exposes logind's interface, but uses ConsoleKit
+It acts as a glue layer that exposes logind's interface, but uses ConsoleKit2
 (https://github.com/ConsoleKit2/ConsoleKit2) as a backend.
 
 It's under heavy development and not ready for general use.

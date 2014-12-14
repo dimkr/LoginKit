@@ -105,33 +105,27 @@ static char *get_session_by_id(GDBusConnection *bus, const char *id)
 	return ret;
 }
 
-gboolean on_handle_unlock_session(LoginKitManager *interface,
-                                  GDBusMethodInvocation *invocation,
-                                  const gchar *id,
-                                  gpointer user_data)
+static gboolean session_action(const char *id, const char *method)
 {
 	GDBusConnection *bus;
 	GVariant *reply;
 	GError *error = NULL;
 	char *session;
-	gboolean ret = FALSE;
-
-	g_log(G_LOG_DOMAIN, G_LOG_LEVEL_INFO, "unlocking %s", id);
 
 	bus = bus_get();
 	if (NULL == bus)
-		goto end;
+		return FALSE;
 
 	/* find the session with the passed ID */
 	session = get_session_by_id(bus, id);
 	if (NULL == session)
-		goto end;
+		return FALSE;
 
 	reply = g_dbus_connection_call_sync(bus,
 	                                    "org.freedesktop.ConsoleKit",
 	                                    session,
 	                                    "org.freedesktop.ConsoleKit.Session",
-	                                    "Unlock",
+	                                    method,
 	                                    NULL,
 	                                    NULL,
 	                                    G_DBUS_CALL_FLAGS_NONE,
@@ -141,15 +135,27 @@ gboolean on_handle_unlock_session(LoginKitManager *interface,
 	if (NULL == reply) {
 		if (NULL != error)
 			g_error_free(error);
-		goto end;
+		return FALSE;
 	}
 
 	g_variant_unref(reply);
 
-	ret = TRUE;
+	return TRUE;
+}
 
-end:
-	login_kit_manager_complete_unlock_session(interface, invocation);
+gboolean on_handle_unlock_session(LoginKitManager *interface,
+                                  GDBusMethodInvocation *invocation,
+                                  const gchar *arg_session,
+                                  gpointer user_data)
+{
+	gboolean ret;
+
+	g_log(G_LOG_DOMAIN, G_LOG_LEVEL_INFO, "unlocking %s", arg_session);
+
+	ret = session_action(arg_session, "Unlock");
+	if (TRUE == ret)
+		login_kit_manager_complete_unlock_session(interface, invocation);
+
 	return ret;
 }
 
@@ -159,11 +165,7 @@ gboolean on_handle_activate_session_on_seat(LoginKitManager *interface,
                                             const gchar *arg_seat,
                                             gpointer user_data)
 {
-	GDBusConnection *bus;
-	GVariant *reply;
-	GError *error = NULL;
-	char *session;
-	gboolean ret = FALSE;
+	gboolean ret;
 
 	g_log(G_LOG_DOMAIN,
 	      G_LOG_LEVEL_INFO,
@@ -171,38 +173,11 @@ gboolean on_handle_activate_session_on_seat(LoginKitManager *interface,
 	      arg_session,
 	      arg_seat);
 
-	bus = bus_get();
-	if (NULL == bus)
-		goto end;
+	ret = session_action(arg_session, "Activate");
+	if (TRUE == ret)
+		login_kit_manager_complete_activate_session_on_seat(interface,
+		                                                    invocation);
 
-	/* find the session with the passed ID */
-	session = get_session_by_id(bus, arg_session);
-	if (NULL == session)
-		goto end;
-
-	reply = g_dbus_connection_call_sync(bus,
-	                                    "org.freedesktop.ConsoleKit",
-	                                    arg_session,
-	                                    "org.freedesktop.ConsoleKit.Session",
-	                                    "Activate",
-	                                    NULL,
-	                                    NULL,
-	                                    G_DBUS_CALL_FLAGS_NONE,
-	                                    -1,
-	                                    NULL,
-	                                    &error);
-	if (NULL == reply) {
-		if (NULL != error)
-			g_error_free(error);
-		goto end;
-	}
-
-	g_variant_unref(reply);
-
-	ret = TRUE;
-
-end:
-	login_kit_manager_complete_activate_session_on_seat(interface, invocation);
 	return ret;
 }
 

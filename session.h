@@ -29,7 +29,7 @@
 
 gboolean on_handle_unlock_session(LoginKitManager *interface,
                                   GDBusMethodInvocation *invocation,
-                                  const gchar *id,
+                                  const gchar *arg_session,
                                   gpointer user_data);
 
 gboolean on_handle_activate_session_on_seat(LoginKitManager *interface,
