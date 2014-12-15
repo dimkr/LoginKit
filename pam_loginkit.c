@@ -78,7 +78,6 @@ int pam_sm_open_session(pam_handle_t *pamh,
 	/* start a ConsoleKit session for the user and and obtain a session
 	 * cookie */
 	g_variant_builder_init(&builder, G_VARIANT_TYPE("(a(sv))"));
-	g_variant_builder_open(&builder, G_VARIANT_TYPE("a(sv)"));
 	g_variant_builder_add(&builder,
 	                      "(sv)",
 	                      "unix-user",

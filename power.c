@@ -168,7 +168,7 @@ gboolean on_handle_inhibit(LoginKitManager *interface,
 	GDBusConnection *bus;
 	GVariant *reply;
 	GError *error = NULL;
-	gint ret = (-1);
+	gint ret;
 
 	g_log(G_LOG_DOMAIN,
 	      G_LOG_LEVEL_INFO,

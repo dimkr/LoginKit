@@ -71,7 +71,7 @@ gboolean on_handle_list_seats(LoginKitManager *interface,
 	GVariant *reply;
 	GError *error = NULL;
 	GDBusConnection *bus;
-	GVariantBuilder *builder;
+	GVariantBuilder builder;
 	GVariant *ret;
 	GVariant *seats;
 	char *seat;
@@ -105,21 +105,20 @@ gboolean on_handle_list_seats(LoginKitManager *interface,
 	g_variant_iter_init(&iter, seats);
 
 	/* create a builder object, to initialize an array */
-	builder = g_variant_builder_new(G_VARIANT_TYPE("a(so)"));
+	g_variant_builder_init(&builder, G_VARIANT_TYPE("a(so)"));
 
 	/* do a best-effort attempt to enumerate all seats */
 	while (TRUE == g_variant_iter_loop(&iter, "o", &seat, NULL)) {
 		id = seat_get_id(bus, seat);
 		if (NULL == id)
 			continue;
-		g_variant_builder_add(builder, "(so)", id, seat);
+		g_variant_builder_add(&builder, "(so)", id, seat);
 	}
 
 	g_variant_unref(reply);
 	g_variant_unref(seats);
 
-	ret = g_variant_new("a(so)", builder);
-	g_variant_builder_unref(builder);
+	ret = g_variant_builder_end(&builder);
 
 	login_kit_manager_complete_list_seats(interface, invocation, ret);
 
