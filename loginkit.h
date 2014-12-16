@@ -45,4 +45,6 @@ int sd_seat_get_sessions(const char *seat,
                          uid_t **uid,
                          unsigned *n_uids);
 
+int sd_booted(void);
+
 #endif

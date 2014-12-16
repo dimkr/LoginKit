@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-LIBSYSTEMD_LOGIN_31 {
+LIBSYSTEMD_209 {
 	global:
 		sd_pid_get_session;
 		sd_pid_get_owner_uid;
@@ -31,9 +31,3 @@ LIBSYSTEMD_LOGIN_31 {
 		sd_pid_get_user_unit;
 		sd_pid_get_slice;
 };
-
-LIBSYSTEMD_LOGIN_43 {
-} LIBSYSTEMD_LOGIN_31;
-
-LIBSYSTEMD_LOGIN_186 {
-} LIBSYSTEMD_LOGIN_31;

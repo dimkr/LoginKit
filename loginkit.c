@@ -37,8 +37,8 @@ static void on_dlclose(void)
 static char *get_session_by_pid(GDBusConnection *bus, pid_t pid)
 {
 	GVariant *reply;
-	GError *error;
-	char *ret;
+	GError *error = NULL;
+	char *ret = NULL;
 
 	if (0 == pid)
 		pid = getpid();
@@ -84,6 +84,12 @@ int sd_pid_get_session(pid_t pid, char **session)
 	*session = get_session_by_pid(bus, pid);
 	if (NULL == *session)
 		return -EINVAL;
+
+	*session = strdup(*session);
+	if (NULL == *session)
+		return -ENOMEM;
+
+	g_log(G_LOG_DOMAIN, G_LOG_LEVEL_INFO, "the session is %s", *session);
 
 	return 0;
 }
@@ -454,4 +460,11 @@ int sd_seat_get_sessions(const char *seat,
 
 end:
 	return ret;
+}
+
+__attribute__((visibility("default")))
+int sd_booted(void)
+{
+	/* no, systemd is not PID 1 */
+	return 0;
 }

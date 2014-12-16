@@ -9,8 +9,8 @@ Overview
 ========
 
 LoginKit is an attempt to implement a compatible, yet standalone alternative to
-logind and libsystemd-login (http://www.freedesktop.org/wiki/Software/systemd),
-which does not depend on a specific init system.
+logind and libsystemd (http://www.freedesktop.org/wiki/Software/systemd), which
+does not depend on a specific init system.
 
 It acts as a glue layer that exposes logind's interface, but uses ConsoleKit2
 (https://github.com/ConsoleKit2/ConsoleKit2) as a backend.
@@ -35,7 +35,7 @@ Usage
 
   - Kill systemd-logind
   - Run loginkitd (quickly, before logind is restarted)
-  - Replace systemd's libsystemd-login.so.0 with LoginKit's one
+  - Replace systemd's libsystemd.so.0 with LoginKit's one
   - Add pam_loginkit.so to PAM's modules directory
   - Replace "pam_systemd" with "pam_loginkit", in PAM's configuration
 

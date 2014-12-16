@@ -186,6 +186,7 @@ gboolean on_handle_get_session(LoginKitManager *interface,
                                const gchar *arg_ssid,
                                gpointer user_data)
 {
+	g_log(G_LOG_DOMAIN, G_LOG_LEVEL_INFO, "getting the session of %s", arg_ssid);
 	login_kit_manager_complete_get_session(interface, invocation, arg_ssid);
 	return TRUE;
 }

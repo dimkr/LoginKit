@@ -6,7 +6,7 @@ PKG_CONFIG ?= pkg-config
 GIO_CFLAGS = $(shell $(PKG_CONFIG) --cflags gio-2.0 gio-unix-2.0)
 GIO_LIBS = $(shell $(PKG_CONFIG) --libs gio-2.0 gio-unix-2.0)
 
-PAM_LIBS = -lpam
+PAM_LIBS = -lpam -lpam_misc
 
 SRCS = $(wildcard *.c)
 OBJS = $(SRCS:.c=.o)
@@ -20,7 +20,7 @@ CFLAGS += -std=gnu99 \
           -DG_LOG_DOMAIN=\"LoginKit\"
 LDFLAGS += -pthread -fPIC
 
-LIB = libsystemd-login.so.0
+LIB = libsystemd.so.0
 PROG = loginkitd
 PAM_MOD = pam_loginkit.so
 
