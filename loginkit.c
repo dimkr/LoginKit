@@ -319,6 +319,8 @@ int sd_session_get_seat(const char *session, char **seat)
 	GDBusConnection *bus;
 	GVariant *reply;
 	GError *error = NULL;
+	char *real_session;
+	int ret;
 
 	g_log(G_LOG_DOMAIN, G_LOG_LEVEL_INFO, "getting the seat of %s", session);
 
@@ -326,9 +328,17 @@ int sd_session_get_seat(const char *session, char **seat)
 	if (NULL == bus)
 		return -EINVAL;
 
+	if (NULL != session)
+		real_session = session;
+	else {
+		ret = sd_pid_get_session(0, &real_session);
+		if (0 != ret)
+			return ret;
+	}
+
 	reply = g_dbus_connection_call_sync(bus,
 	                                    "org.freedesktop.ConsoleKit",
-	                                    session,
+	                                    real_session,
 	                                    "org.freedesktop.ConsoleKit.Session",
 	                                    "GetSeatId",
 	                                    NULL,
