@@ -194,6 +194,9 @@ int pam_sm_open_session(pam_handle_t *pamh,
 			goto close_session;
 	}
 
+	if (-1 == chown(path, passwd->pw_uid, passwd->pw_gid))
+		goto close_session;
+
 	/* store the directory path in XDG_RUNTIME_DIR environment variable */
 	if (PAM_SUCCESS == pam_misc_setenv(pamh, "XDG_RUNTIME_DIR", path, 0))
 		return PAM_SUCCESS;
