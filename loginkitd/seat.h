@@ -22,25 +22,31 @@
  * THE SOFTWARE.
  */
 
-#ifndef _SESSION_H_INCLUDED
-#	define _SESSION_H_INCLUDED
+#ifndef _LOGINKITD_SEAT_H_INCLUDED
+#	define _LOGINKITD_SEAT_H_INCLUDED
 
 #	include "loginkitd-generated.h"
 
-gboolean on_handle_unlock_session(LoginKitManager *interface,
-                                  GDBusMethodInvocation *invocation,
-                                  const gchar *arg_session,
-                                  gpointer user_data);
+char *get_seat_id(GDBusConnection *bus, const char *seat);
 
-gboolean on_handle_activate_session_on_seat(LoginKitManager *interface,
-                                            GDBusMethodInvocation *invocation,
-                                            const gchar *arg_session,
-                                            const gchar *arg_seat,
-                                            gpointer user_data);
+gboolean on_handle_list_seats(LoginKitManager *interface,
+                              GDBusMethodInvocation *invocation,
+                              gpointer user_data);
 
-gboolean on_handle_get_session(LoginKitManager *interface,
-                               GDBusMethodInvocation *invocation,
-                               const gchar *arg_ssid,
-                               gpointer user_data);
+void on_seat_added(GDBusConnection *connection,
+                   const gchar *sender_name,
+                   const gchar *object_path,
+                   const gchar *interface_name,
+                   const gchar *signal_name,
+                   GVariant *parameters,
+                   gpointer user_data);
+
+void on_seat_removed(GDBusConnection *connection,
+                     const gchar *sender_name,
+                     const gchar *object_path,
+                     const gchar *interface_name,
+                     const gchar *signal_name,
+                     GVariant *parameters,
+                     gpointer user_data);
 
 #endif

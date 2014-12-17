@@ -22,12 +22,25 @@
  * THE SOFTWARE.
  */
 
-#ifndef _BUS_H_INCLUDED
-#	define _BUS_H_INCLUDED
+#ifndef _LOGINKITD_SESSION_H_INCLUDED
+#	define _LOGINKITD_SESSION_H_INCLUDED
 
-#include <gio/gio.h>
+#	include "loginkitd-generated.h"
 
-GDBusConnection *bus_get(void);
-void bus_close(void);
+gboolean on_handle_unlock_session(LoginKitManager *interface,
+                                  GDBusMethodInvocation *invocation,
+                                  const gchar *arg_session,
+                                  gpointer user_data);
+
+gboolean on_handle_activate_session_on_seat(LoginKitManager *interface,
+                                            GDBusMethodInvocation *invocation,
+                                            const gchar *arg_session,
+                                            const gchar *arg_seat,
+                                            gpointer user_data);
+
+gboolean on_handle_get_session(LoginKitManager *interface,
+                               GDBusMethodInvocation *invocation,
+                               const gchar *arg_ssid,
+                               gpointer user_data);
 
 #endif

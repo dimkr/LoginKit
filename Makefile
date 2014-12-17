@@ -1,49 +1,35 @@
-CC ?= cc
-CFLAGS ?= -O2 -pipe
-LDFLAGS ?= -s
-PKG_CONFIG ?= pkg-config
+DESTDIR ?=
+PREFIX ?= /usr
 
-GIO_CFLAGS = $(shell $(PKG_CONFIG) --cflags gio-2.0 gio-unix-2.0)
-GIO_LIBS = $(shell $(PKG_CONFIG) --libs gio-2.0 gio-unix-2.0)
+SBIN_DIR = $(PREFIX)/sbin
+DOC_DIR = $(PREFIX)/share/doc
+LIB_DIR = $(PREFIX)/lib
 
-PAM_LIBS = -lpam -lpam_misc
+INSTALL = install -v
+LN = ln -v
 
-SRCS = $(wildcard *.c)
-OBJS = $(SRCS:.c=.o)
+all: libsystemd/libsystemd.so.0 loginkitd/loginkitd pam_loginkit/pam_loginkit.so
 
-CFLAGS += -std=gnu99 \
-          -Wall \
-          -pedantic \
-          -pthread \
-          -fvisibility=hidden \
-          -fPIC \
-          -DG_LOG_DOMAIN=\"LoginKit\"
-LDFLAGS += -pthread -fPIC
+common/libloginkit-common.a:
+	cd common; $(MAKE)
 
-LIB = libsystemd.so.0
-PROG = loginkitd
-PAM_MOD = pam_loginkit.so
+libsystemd/libsystemd.so.0: common/libloginkit-common.a
+	cd libsystemd; $(MAKE)
 
-all: $(LIB) $(PROG) $(PAM_MOD)
+loginkitd/loginkitd: common/libloginkit-common.a
+	cd loginkitd; $(MAKE)
 
-%.o: %.c
-	$(CC) -c -o $@ $< $(CFLAGS) $(GIO_CFLAGS)
+pam_loginkit/pam_loginkit.so: common/libloginkit-common.a
+	cd pam_loginkit; $(MAKE)
 
-loginkitd-generated.c: interface.xml
-	gdbus-codegen --generate-c-code \
-	              loginkitd-generated \
-	              --c-namespace LoginKit \
-	              --interface-prefix org.freedesktop.login1. \
-	              $^
-
-$(PROG): bus.o loginkitd-generated.o seat.o session.o power.o loginkitd.o
-	$(CC) -o $@ $^ $(LDFLAGS) $(GIO_LIBS)
-
-$(LIB): bus.o loginkit.o compat.sym
-	$(CC) -o $@ bus.o loginkit.o -shared $(LDFLAGS) $(GIO_LIBS) -Wl,--version-script=compat.sym
-
-$(PAM_MOD): bus.o pam_loginkit.o
-	$(CC) -o $@ $^ -shared $(LDFLAGS) $(GIO_LIBS) $(PAM_LIBS)
+install: all
+	$(INSTALL) -D -m 644 pam_loginkit/pam_loginkit.so $(DESTDIR)/$(LIB_DIR)/security/pam_loginkit.so
+	$(INSTALL) -D -m 644 libsystemd/libsystemd.so.0 $(DESTDIR)/$(LIB_DIR)/libsystemd.so.0.0.1
+	$(LN) -s libsystemd.so.0.0.1 $(DESTDIR)/$(LIB_DIR)/libsystemd.so.0
+	$(INSTALL) -D -m 755 loginkitd/loginkitd $(DESTDIR)/$(SBIN_DIR)/loginkitd
 
 clean:
-	rm -f $(PAM_MOD) $(PROG) loginkitd-generated.h loginkitd-generated.c $(LIB) $(OBJS)
+	cd pam_loginkit; $(MAKE) clean
+	cd loginkitd; $(MAKE) clean
+	cd libsystemd; $(MAKE) clean
+	cd common; $(MAKE) clean

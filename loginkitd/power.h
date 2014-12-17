@@ -22,8 +22,8 @@
  * THE SOFTWARE.
  */
 
-#ifndef _POWER_H_INCLUDED
-#	define _POWER_H_INCLUDED
+#ifndef _LOGINKITD_POWER_H_INCLUDED
+#	define _LOGINKITD_POWER_H_INCLUDED
 
 #	include "loginkitd-generated.h"
 
