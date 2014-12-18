@@ -3,6 +3,13 @@ CFLAGS ?= -O2 -pipe
 LDFLAGS ?= -s
 PKG_CONFIG ?= pkg-config
 
+PREFIX ?= /usr
+
+SBIN_DIR = $(PREFIX)/sbin
+DOC_DIR = $(PREFIX)/share/doc
+LIB_DIR = $(PREFIX)/lib
+INCLUDE_DIR = $(PREFIX)/include
+
 CFLAGS += -I../common
 LDFLAGS += -L../common
 LIBS = -lloginkit-common

@@ -1,20 +1,19 @@
-DESTDIR ?=
-PREFIX ?= /usr
+include ./Makefile.common
 
-SBIN_DIR = $(PREFIX)/sbin
-DOC_DIR = $(PREFIX)/share/doc
-LIB_DIR = $(PREFIX)/lib
-INCLUDE_DIR = $(PREFIX)/include
+DESTDIR ?=
 
 INSTALL = install -v
 LN = ln -v
 
-all: libsystemd/libsystemd.so.0 loginkitd/loginkitd pam_loginkit/pam_loginkit.so
+all: libsystemd/libsystemd.so.0 \
+     loginkitd/loginkitd \
+     pam_loginkit/pam_loginkit.so \
+     libsystemd/libsystemd.pc
 
 common/libloginkit-common.a:
 	cd common; $(MAKE)
 
-libsystemd/libsystemd.so.0: common/libloginkit-common.a
+libsystemd/libsystemd.so.0 libsystemd/libsystemd.pc: common/libloginkit-common.a
 	cd libsystemd; $(MAKE)
 
 loginkitd/loginkitd: common/libloginkit-common.a
@@ -35,6 +34,11 @@ install: all
 	$(INSTALL) -D -m 644 libsystemd/sd-login.h $(DESTDIR)/$(INCLUDE_DIR)/systemd/sd-login.h
 	$(INSTALL) -D -m 644 libsystemd/journal.h $(DESTDIR)/$(INCLUDE_DIR)/systemd/sd-journal.h
 	$(INSTALL) -D -m 644 libsystemd/sd-daemon.h $(DESTDIR)/$(INCLUDE_DIR)/systemd/sd-daemon.h
+
+	$(INSTALL) -D -m 644 libsystemd/libsystemd.pc $(DESTDIR)/$(LIB_DIR)/pkgconfig/libsystemd.pc
+	$(LN) -s libsystemd.pc $(DESTDIR)/$(LIB_DIR)/pkgconfig/libsystemd-daemon.pc
+	$(LN) -s libsystemd.pc $(DESTDIR)/$(LIB_DIR)/pkgconfig/libsystemd-journal.pc
+	$(LN) -s libsystemd.pc $(DESTDIR)/$(LIB_DIR)/pkgconfig/libsystemd-login.pc
 
 clean:
 	cd pam_loginkit; $(MAKE) clean
