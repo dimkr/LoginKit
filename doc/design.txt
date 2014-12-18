@@ -67,6 +67,13 @@ This does not make much sense, because:
 Having a file-based information querying API is nice to have, but only if it's
 the only API.
 
+libsystemd
+==========
+
+libsystemd-login's API was moved to libsystemd, deprecating libsystemd-login.
+This makes it harder to package systemd in a modular way and develop
+alternatives to specific components, because all API is stuffed in one library.
+
 pam_systemd
 ===========
 

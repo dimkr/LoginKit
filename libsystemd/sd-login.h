@@ -22,12 +22,11 @@
  * THE SOFTWARE.
  */
 
-#ifndef _LOGINKIT_COMMON_BUS_H_INCLUDED
-#	define _LOGINKIT_COMMON_BUS_H_INCLUDED
+#ifndef _LOGINKIT_LOGIN_H_INCLUDED
+#	define _LOGINKIT_LOGIN_H_INCLUDED
 
-#include <gio/gio.h>
-
-GDBusConnection *bus_get(void);
-void bus_close(void);
+#	include "pid.h"
+#	include "seat.h"
+#	include "session.h"
 
 #endif

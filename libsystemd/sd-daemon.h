@@ -22,12 +22,24 @@
  * THE SOFTWARE.
  */
 
-#ifndef _LOGINKIT_COMMON_BUS_H_INCLUDED
-#	define _LOGINKIT_COMMON_BUS_H_INCLUDED
+#ifndef _LOGINKIT_DAEMON_H_INCLUDED
+#	define _LOGINKIT_DAEMON_H_INCLUDED
 
-#include <gio/gio.h>
+#	include <syslog.h>
 
-GDBusConnection *bus_get(void);
-void bus_close(void);
+#	include "misc.h"
+
+#	define SD_PASTE(x) #x
+#	define SD_STR(x) SD_PASTE(x)
+
+/* the SD* string constants mirror the LOG_* integers */
+#	define SD_EMERG "<" SD_STR(LOG_EMERG) ">"
+#	define SD_ALERT "<" SD_STR(LOG_ALERT) ">"
+#	define SD_CRIT "<" SD_STR(LOG_CRIT) ">"
+#	define SD_ERR "<" SD_STR(LOG_ERR) ">"
+#	define SD_WARNING "<" SD_STR(LOG_WARNING) ">"
+#	define SD_NOTICE "<" SD_STR(LOG_NOTICE) ">"
+#	define SD_INFO "<" SD_STR(LOG_INFO) ">"
+#	define SD_DEBUG "<" SD_STR(LOG_DEBUG) ">"
 
 #endif
