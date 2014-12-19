@@ -180,6 +180,7 @@ int sd_pid_get_unit(pid_t pid, char **unit)
 {
 	/* quote from the man page: "For processes not being part of a systemd
 	 * system unit this function will fail." */
+	*unit = NULL;
 	return -EINVAL;
 }
 

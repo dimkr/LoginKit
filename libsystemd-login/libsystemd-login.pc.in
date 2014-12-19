@@ -29,5 +29,4 @@ Name: LoginKit
 Description: LoginKit library
 Version: 1
 Libs: -L${libdir} -lsystemd
-Libs.private: -L${libdir} -lsystemd-daemon -lsystemd-journal -lsystemd-login
 Cflags: -I${includedir}

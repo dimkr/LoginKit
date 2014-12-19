@@ -5,43 +5,70 @@ DESTDIR ?=
 INSTALL = install -v
 LN = ln -v
 
-all: libsystemd/libsystemd.so.0 \
+all: libsystemd-daemon/libsystemd-daemon.so \
+     libsystemd-journal/libsystemd-journal.so \
+     libsystemd-login/libsystemd-login.so \
+     libsystemd/libsystemd.so \
      loginkitd/loginkitd \
-     pam_loginkit/pam_loginkit.so \
-     libsystemd/libsystemd.pc
+     pam_loginkit/pam_loginkit.so
 
 common/libloginkit-common.a:
 	cd common; $(MAKE)
 
-libsystemd/libsystemd.so.0 libsystemd/libsystemd.pc: common/libloginkit-common.a
-	cd libsystemd; $(MAKE)
+libsystemd-daemon/libsystemd-daemon.so: common/libloginkit-common.a
+	cd libsystemd-daemon; $(MAKE)
+
+libsystemd-journal/libsystemd-journal.so: common/libloginkit-common.a
+	cd libsystemd-journal; $(MAKE)
 
 loginkitd/loginkitd: common/libloginkit-common.a
 	cd loginkitd; $(MAKE)
+
+libsystemd-login/libsystemd-login.so: common/libloginkit-common.a
+	cd libsystemd-login; $(MAKE)
+
+libsystemd/libsystemd.so: libsystemd-daemon/libsystemd-daemon.so \
+                              libsystemd-journal/libsystemd-journal.so \
+                              libsystemd-login/libsystemd-login.so
+	cd libsystemd; $(MAKE)
 
 pam_loginkit/pam_loginkit.so: common/libloginkit-common.a
 	cd pam_loginkit; $(MAKE)
 
 install: all
+	$(INSTALL) -D -m 644 libsystemd-daemon/libsystemd-daemon.so $(DESTDIR)/$(LIB_DIR)/libsystemd-daemon.so.0.1
+	$(LN) -s libsystemd-daemon.so.0.1 $(DESTDIR)/$(LIB_DIR)/libsystemd-daemon.so.0
+	$(LN) -s libsystemd-daemon.so.0.1 $(DESTDIR)/$(LIB_DIR)/libsystemd-daemon.so
+	$(INSTALL) -D -m 644 libsystemd-daemon/sd-daemon.h $(DESTDIR)/$(INCLUDE_DIR)/systemd/sd-daemon.h
+	$(INSTALL) -D -m 644 libsystemd-daemon/libsystemd-daemon.pc $(DESTDIR)/$(LIB_DIR)/pkgconfig/libsystemd-daemon.pc
+
+	$(INSTALL) -m 644 libsystemd-journal/libsystemd-journal.so $(DESTDIR)/$(LIB_DIR)/libsystemd-journal.so.0.1
+	$(LN) -s libsystemd-journal.so.0.1 $(DESTDIR)/$(LIB_DIR)/libsystemd-journal.so.0
+	$(LN) -s libsystemd-journal.so.0.1 $(DESTDIR)/$(LIB_DIR)/libsystemd-journal.so
+	$(INSTALL) -m 644 libsystemd-journal/journal.h $(DESTDIR)/$(INCLUDE_DIR)/systemd/sd-journal.h
+	$(INSTALL) -m 644 libsystemd-journal/libsystemd-journal.pc $(DESTDIR)/$(LIB_DIR)/pkgconfig/libsystemd-journal.pc
+
+	$(INSTALL) -m 644 libsystemd-login/libsystemd-login.so $(DESTDIR)/$(LIB_DIR)/libsystemd-login.so.0.1
+	$(LN) -s libsystemd-login.so.0.1 $(DESTDIR)/$(LIB_DIR)/libsystemd-login.so.0
+	$(LN) -s libsystemd-login.so.0.1 $(DESTDIR)/$(LIB_DIR)/libsystemd-login.so
+	$(INSTALL) -m 644 libsystemd-login/session.h $(DESTDIR)/$(INCLUDE_DIR)/systemd/session.h
+	$(INSTALL) -m 644 libsystemd-login/seat.h $(DESTDIR)/$(INCLUDE_DIR)/systemd/seat.h
+	$(INSTALL) -m 644 libsystemd-login/pid.h $(DESTDIR)/$(INCLUDE_DIR)/systemd/pid.h
+	$(INSTALL) -m 644 libsystemd-login/sd-login.h $(DESTDIR)/$(INCLUDE_DIR)/systemd/sd-login.h
+	$(INSTALL) -m 644 libsystemd-login/libsystemd-login.pc $(DESTDIR)/$(LIB_DIR)/pkgconfig/libsystemd-login.pc
+
+	$(INSTALL) -m 644 libsystemd/libsystemd.so $(DESTDIR)/$(LIB_DIR)/libsystemd.so.0.1
+	$(LN) -s libsystemd.so.0.1 $(DESTDIR)/$(LIB_DIR)/libsystemd.so.0
+	$(LN) -s libsystemd.so.0.1 $(DESTDIR)/$(LIB_DIR)/libsystemd.so
+
 	$(INSTALL) -D -m 644 pam_loginkit/pam_loginkit.so $(DESTDIR)/$(LIB_DIR)/security/pam_loginkit.so
-	$(INSTALL) -D -m 644 libsystemd/libsystemd.so.0 $(DESTDIR)/$(LIB_DIR)/libsystemd.so.0.0.1
-	$(LN) -s libsystemd.so.0.0.1 $(DESTDIR)/$(LIB_DIR)/libsystemd.so.0
 	$(INSTALL) -D -m 755 loginkitd/loginkitd $(DESTDIR)/$(SBIN_DIR)/loginkitd
-
-	$(INSTALL) -D -m 644 libsystemd/session.h $(DESTDIR)/$(INCLUDE_DIR)/systemd/session.h
-	$(INSTALL) -D -m 644 libsystemd/seat.h $(DESTDIR)/$(INCLUDE_DIR)/systemd/seat.h
-	$(INSTALL) -D -m 644 libsystemd/pid.h $(DESTDIR)/$(INCLUDE_DIR)/systemd/pid.h
-	$(INSTALL) -D -m 644 libsystemd/sd-login.h $(DESTDIR)/$(INCLUDE_DIR)/systemd/sd-login.h
-	$(INSTALL) -D -m 644 libsystemd/journal.h $(DESTDIR)/$(INCLUDE_DIR)/systemd/sd-journal.h
-	$(INSTALL) -D -m 644 libsystemd/sd-daemon.h $(DESTDIR)/$(INCLUDE_DIR)/systemd/sd-daemon.h
-
-	$(INSTALL) -D -m 644 libsystemd/libsystemd.pc $(DESTDIR)/$(LIB_DIR)/pkgconfig/libsystemd.pc
-	$(LN) -s libsystemd.pc $(DESTDIR)/$(LIB_DIR)/pkgconfig/libsystemd-daemon.pc
-	$(LN) -s libsystemd.pc $(DESTDIR)/$(LIB_DIR)/pkgconfig/libsystemd-journal.pc
-	$(LN) -s libsystemd.pc $(DESTDIR)/$(LIB_DIR)/pkgconfig/libsystemd-login.pc
 
 clean:
 	cd pam_loginkit; $(MAKE) clean
 	cd loginkitd; $(MAKE) clean
 	cd libsystemd; $(MAKE) clean
+	cd libsystemd-login; $(MAKE) clean
+	cd libsystemd-journal; $(MAKE) clean
+	cd libsystemd-daemon; $(MAKE) clean
 	cd common; $(MAKE) clean

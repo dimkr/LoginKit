@@ -22,12 +22,7 @@
  * THE SOFTWARE.
  */
 
-LIBSYSTEMD_209 {
+LIBSYSTEMD_DAEMON_31 {
 	global:
-		sd_pid_get_session;
-		sd_pid_get_owner_uid;
-		sd_pid_get_machine_name;
-		sd_pid_get_unit;
-		sd_pid_get_user_unit;
-		sd_pid_get_slice;
+		sd_booted;
 };

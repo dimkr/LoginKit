@@ -1,6 +1,6 @@
 CC ?= cc
 CFLAGS ?= -O2 -pipe
-LDFLAGS ?= -s
+LDFLAGS ?= -Wl,-s
 PKG_CONFIG ?= pkg-config
 
 PREFIX ?= /usr
@@ -10,8 +10,8 @@ DOC_DIR = $(PREFIX)/share/doc
 LIB_DIR = $(PREFIX)/lib
 INCLUDE_DIR = $(PREFIX)/include
 
-CFLAGS += -I../common
-LDFLAGS += -L../common
+CFLAGS += -I$(PWD)/../common
+LDFLAGS += -L$(PWD)/../common
 LIBS = -lloginkit-common
 
 GIO_CFLAGS = $(shell $(PKG_CONFIG) --cflags gio-2.0 gio-unix-2.0)
@@ -25,8 +25,7 @@ OBJS = $(SRCS:.c=.o)
 CFLAGS += -std=gnu99 \
           -Wall \
           -pedantic \
-          -pthread \
           -fvisibility=hidden \
           -fPIC \
           -DG_LOG_DOMAIN=\"LoginKit\"
-LDFLAGS += -pthread -fPIC
+LDFLAGS += -fPIC

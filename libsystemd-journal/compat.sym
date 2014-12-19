@@ -22,18 +22,12 @@
  * THE SOFTWARE.
  */
 
-#include "bus.h"
-#include "misc.h"
+LIBSYSTEMD_JOURNAL_38 {
+	global:
+		sd_journal_printv;
+		sd_journal_print;
+		sd_journal_perror;
+};
 
-__attribute__((visibility("default")))
-int sd_booted(void)
-{
-	/* no, systemd is not PID 1 */
-	return 0;
-}
-
-__attribute__((destructor))
-static void on_dlclose(void)
-{
-	bus_close();
-}
+LIBSYSTEMD_JOURNAL_205 {
+} LIBSYSTEMD_JOURNAL_38;

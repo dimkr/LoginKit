@@ -1,22 +1,21 @@
 include ../Makefile.common
 
-LDFLAGS += -Wl,--version-script=compat.sym
+LDFLAGS += -Wl,-soname=libsystemd.so.0 \
+           -Wl,--no-as-needed \
+           -L$(PWD)/../libsystemd-daemon \
+           -L$(PWD)/../libsystemd-journal \
+           -L$(PWD)/../libsystemd-login
+LIBS += -lsystemd-daemon -lsystemd-journal -lsystemd-login
 
-LIB = libsystemd.so.0
+LIB = libsystemd.so
 
-all: $(LIB) libsystemd.pc
+all: $(LIB)
 
 %.o: %.c
-	$(CC) -c -o $@ $< $(CFLAGS) $(GIO_CFLAGS)
+	$(CC) -c -o $@ $< $(CFLAGS)
 
-$(LIB): $(OBJS) compat.sym
-	$(CC) -o $@ $(OBJS) -shared $(LDFLAGS) $(LIBS) $(GIO_LIBS)
-
-libsystemd.pc: libsystemd.pc.in
-	sed -e s~@PREFIX@~$(PREFIX)~g \
-	    -e s~@LIB_DIR@~$(LIB_DIR)~g \
-	    -e s~@INCLUDE_DIR@~$(INCLUDE_DIR)~g \
-	    $^ > $@
+$(LIB): $(OBJS)
+	$(CC) -o $@ $(OBJS) -shared $(LDFLAGS) $(LIBS)
 
 clean:
-	rm -f libsystemd.pc $(LIB) $(OBJS)
+	rm -f $(LIB) $(OBJS)

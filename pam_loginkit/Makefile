@@ -1,5 +1,8 @@
 include ../Makefile.common
 
+CFLAGS += -pthread
+LDFLAGS += -pthread
+
 LIB = pam_loginkit.so
 
 all: $(LIB)
