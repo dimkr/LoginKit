@@ -140,6 +140,18 @@ int sd_session_get_type(const char *session, char **type)
 }
 
 __attribute__((visibility("default")))
+int sd_session_get_class(const char *session, char **class)
+{
+	/* ConsoleKit does not have session classes, so we assume all sessions are
+	 * "user" ones */
+	*class = strndup("user", 4);
+	if (NULL == *class)
+		return -ENOMEM;
+
+	return 0;
+}
+
+__attribute__((visibility("default")))
 int sd_session_get_seat(const char *session, char **seat)
 {
 	GDBusConnection *bus;

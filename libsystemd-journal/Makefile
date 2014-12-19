@@ -1,6 +1,9 @@
 include ../Makefile.common
 
-LDFLAGS += -Wl,-soname=libsystemd-journal.so.0 -Wl,--version-script=compat.sym
+CFLAGS += -pthread
+LDFLAGS += -pthread \
+           -Wl,-soname=libsystemd-journal.so.0 \
+           -Wl,--version-script=compat.sym
 
 LIB = libsystemd-journal.so
 

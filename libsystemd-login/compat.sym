@@ -43,6 +43,7 @@ LIBSYSTEMD_LOGIN_38 {
 LIBSYSTEMD_LOGIN_43 {
 	global:
 		sd_session_get_type;
+		sd_session_get_class;
 } LIBSYSTEMD_LOGIN_38;
 
 LIBSYSTEMD_LOGIN_186 {

@@ -27,6 +27,7 @@ LIBSYSTEMD_JOURNAL_38 {
 		sd_journal_printv;
 		sd_journal_print;
 		sd_journal_perror;
+		sd_journal_stream_fd;
 };
 
 LIBSYSTEMD_JOURNAL_205 {

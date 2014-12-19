@@ -30,6 +30,7 @@
 int sd_session_is_active(const char *session);
 int sd_session_get_state(const char *session, char **state);
 int sd_session_get_type(const char *session, char **type);
+int sd_session_get_class(const char *session, char **class);
 int sd_session_get_seat(const char *session, char **seat);
 int sd_session_get_uid(const char *session, uid_t *uid);
 
