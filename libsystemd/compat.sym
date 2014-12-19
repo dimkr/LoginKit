@@ -22,39 +22,34 @@
  * THE SOFTWARE.
  */
 
-#ifndef _LOGINKIT_JOURNAL_H_INCLUDED
-#	define _LOGINKIT_JOURNAL_H_INCLUDED
+LIBSYSTEMD_209 {
+	global:
+		sd_booted;
 
-#	include <stdarg.h>
-#	include <signal.h>
+		sd_journal_printv;
+		sd_journal_print;
+		sd_journal_perror;
+		sd_journal_stream_fd;
 
-#	define MAX_FMT_LEN (1024)
-#	define MAX_MSG_LEN (2048)
-
-struct stream_params {
-	sigset_t mask;
-	const char *identifier;
-	int priority;
-	int fd;
+		sd_pid_get_session;
+		sd_pid_get_owner_uid;
+		sd_pid_get_user_unit;
+		sd_pid_get_slice;
+		sd_session_is_active;
+		sd_session_get_seat;
+		sd_session_get_uid;
+		sd_seat_can_multi_session;
+		sd_seat_get_sessions;
+		sd_login_monitor_new;
+		sd_login_monitor_unref;
+		sd_login_monitor_flush;
+		sd_login_monitor_get_fd;
+		sd_pid_get_unit;
+		sd_session_get_type;
+		sd_session_get_class;
+		sd_session_get_state;
+		sd_login_monitor_get_events;
+		sd_login_monitor_get_timeout;
+		sd_pid_get_machine_name;
+		sd_uid_get_seats;
 };
-
-int sd_journal_printv(int priority, const char *format, va_list ap);
-int sd_journal_print(int priority, const char *format, ...);
-int sd_journal_print_with_location(int priority,
-                                   const char *file,
-                                   const char *line,
-                                   const char *func,
-                                   const char *format,
-                                   ...);
-
-/* this function is problematic, because /dev/log is a datagram Unix socket;
- * therefore, it creates a pair of connected stream sockets and spawns a thread
- * that reads messages sent through the socket, then relays them to syslogd
- * using syslog() */
-int sd_journal_stream_fd(const char *identifier,
-                         int priority,
-                         int level_prefix);
-
-int sd_journal_perror(const char *message);
-
-#endif

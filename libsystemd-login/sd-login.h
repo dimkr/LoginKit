@@ -28,5 +28,7 @@
 #	include "pid.h"
 #	include "seat.h"
 #	include "session.h"
+#	include "uid.h"
+#	include "monitor.h"
 
 #endif

@@ -28,8 +28,8 @@ libsystemd-login/libsystemd-login.so: common/libloginkit-common.a
 	cd libsystemd-login; $(MAKE)
 
 libsystemd/libsystemd.so: libsystemd-daemon/libsystemd-daemon.so \
-                              libsystemd-journal/libsystemd-journal.so \
-                              libsystemd-login/libsystemd-login.so
+                          libsystemd-journal/libsystemd-journal.so \
+                          libsystemd-login/libsystemd-login.so
 	cd libsystemd; $(MAKE)
 
 pam_loginkit/pam_loginkit.so: common/libloginkit-common.a

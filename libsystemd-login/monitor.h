@@ -22,39 +22,23 @@
  * THE SOFTWARE.
  */
 
-#ifndef _LOGINKIT_JOURNAL_H_INCLUDED
-#	define _LOGINKIT_JOURNAL_H_INCLUDED
+#ifndef _LOGINKIT_MONITOR_H_INCLUDED
+#	define _LOGINKIT_MONITOR_H_INCLUDED
 
-#	include <stdarg.h>
-#	include <signal.h>
+#	include <stdint.h>
 
-#	define MAX_FMT_LEN (1024)
-#	define MAX_MSG_LEN (2048)
-
-struct stream_params {
-	sigset_t mask;
-	const char *identifier;
-	int priority;
+typedef struct {
 	int fd;
-};
+	int wd;
+} sd_login_monitor;
 
-int sd_journal_printv(int priority, const char *format, va_list ap);
-int sd_journal_print(int priority, const char *format, ...);
-int sd_journal_print_with_location(int priority,
-                                   const char *file,
-                                   const char *line,
-                                   const char *func,
-                                   const char *format,
-                                   ...);
+int sd_login_monitor_new(const char *category,
+                         sd_login_monitor **ret);
+sd_login_monitor *sd_login_monitor_unref(sd_login_monitor *m);
+int sd_login_monitor_flush(sd_login_monitor *m);
+int sd_login_monitor_get_fd(sd_login_monitor *m);
 
-/* this function is problematic, because /dev/log is a datagram Unix socket;
- * therefore, it creates a pair of connected stream sockets and spawns a thread
- * that reads messages sent through the socket, then relays them to syslogd
- * using syslog() */
-int sd_journal_stream_fd(const char *identifier,
-                         int priority,
-                         int level_prefix);
-
-int sd_journal_perror(const char *message);
+int sd_login_monitor_get_events(sd_login_monitor *m);
+int sd_login_monitor_get_timeout(sd_login_monitor *m, uint64_t *timeout_usec);
 
 #endif

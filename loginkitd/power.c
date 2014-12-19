@@ -194,19 +194,20 @@ gboolean on_handle_inhibit(LoginKitManager *interface,
 	                                    -1,
 	                                    NULL,
 	                                    &error);
-	if (NULL == reply) {
-		if (NULL != error)
-			g_error_free(error);
-		return FALSE;
+	if (NULL != reply) {
+		login_kit_manager_complete_inhibit(interface,
+		                                   invocation,
+		                                   g_variant_new("(h)", ret));
+		return TRUE;
 	}
+
+	if (NULL != error)
+		g_error_free(error);
 
 	g_variant_get(reply, "(h)", &ret);
 	g_variant_unref(reply);
 
-	login_kit_manager_complete_inhibit(interface,
-	                                   invocation,
-	                                   g_variant_new("(h)", ret));
-	return TRUE;
+	return FALSE;
 }
 
 static gboolean handle_action(const char *method, const gboolean interactive)

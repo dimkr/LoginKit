@@ -139,16 +139,12 @@ static void *relay(void *arg)
 			break;
 		message[len] = '\0';
 
-		/* if the message begins <%d> (one of the SD_* constants), strip it and
-		 * the space after it */
+		/* if the message begins <%d> (one of the SD_* constants), strip it */
 		off = strchr(message, '>');
 		if (NULL == off)
 			off = message;
-		else {
+		else
 			++off;
-			if (' ' == off[0])
-				++off;
-		}
 
 		if (0 != sd_journal_print(params->priority,
 		                          "%s: %s",

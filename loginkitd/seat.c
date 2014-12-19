@@ -22,6 +22,12 @@
  * THE SOFTWARE.
  */
 
+#include <stdio.h>
+#include <limits.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
 #include <glib/gstdio.h>
 
 #include "bus.h"
@@ -133,9 +139,11 @@ void on_seat_added(GDBusConnection *connection,
                    GVariant *parameters,
                    gpointer user_data)
 {
+	char path[PATH_MAX];
 	GDBusConnection *bus;
 	char *seat;
 	char *id;
+	int len;
 
 	bus = bus_get();
 	if (NULL == bus)
@@ -149,6 +157,13 @@ void on_seat_added(GDBusConnection *connection,
 		return;
 
 	login_kit_manager_emit_seat_new((LoginKitManager *) user_data, id, seat);
+
+	/* create a file under /run/systemd/seats */
+	len = snprintf(path, sizeof(path), "/run/systemd/seats/%s", seat);
+	if ((0 >= len) || (sizeof(path) <= len))
+		return;
+
+	(void) creat(path, 0644);
 }
 
 void on_seat_removed(GDBusConnection *connection,
@@ -159,9 +174,11 @@ void on_seat_removed(GDBusConnection *connection,
                      GVariant *parameters,
                      gpointer user_data)
 {
+	char path[PATH_MAX];
 	GDBusConnection *bus;
 	char *seat;
 	char *id;
+	int len;
 
 	bus = bus_get();
 	if (NULL == bus)
@@ -177,4 +194,11 @@ void on_seat_removed(GDBusConnection *connection,
 	login_kit_manager_emit_seat_removed((LoginKitManager *) user_data,
 	                                    id,
 	                                    seat);
+
+	/* delete the file under /run/systemd/seats */
+	len = snprintf(path, sizeof(path), "/run/systemd/seats/%s", seat);
+	if ((0 >= len) || (sizeof(path) <= len))
+		return;
+
+	(void) unlink(path);
 }
