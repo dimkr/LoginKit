@@ -28,6 +28,7 @@
 #	include <syslog.h>
 
 #	include "misc.h"
+#	include "fd.h"
 
 #	define SD_PASTE(x) #x
 #	define SD_STR(x) SD_PASTE(x)

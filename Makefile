@@ -39,6 +39,8 @@ install: all
 	$(INSTALL) -D -m 644 libsystemd-daemon/libsystemd-daemon.so $(DESTDIR)/$(LIB_DIR)/libsystemd-daemon.so.0.1
 	$(LN) -s libsystemd-daemon.so.0.1 $(DESTDIR)/$(LIB_DIR)/libsystemd-daemon.so.0
 	$(LN) -s libsystemd-daemon.so.0.1 $(DESTDIR)/$(LIB_DIR)/libsystemd-daemon.so
+	$(INSTALL) -D -m 644 libsystemd-daemon/misc.h $(DESTDIR)/$(INCLUDE_DIR)/systemd/misc.h
+	$(INSTALL) -D -m 644 libsystemd-daemon/fd.h $(DESTDIR)/$(INCLUDE_DIR)/systemd/fd.h
 	$(INSTALL) -D -m 644 libsystemd-daemon/sd-daemon.h $(DESTDIR)/$(INCLUDE_DIR)/systemd/sd-daemon.h
 	$(INSTALL) -D -m 644 libsystemd-daemon/libsystemd-daemon.pc $(DESTDIR)/$(LIB_DIR)/pkgconfig/libsystemd-daemon.pc
 

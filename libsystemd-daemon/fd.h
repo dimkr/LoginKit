@@ -22,12 +22,14 @@
  * THE SOFTWARE.
  */
 
-#ifndef _LOGINKIT_MISC_H_INCLUDED
-#	define _LOGINKIT_MISC_H_INCLUDED
+#ifndef _LOGINKIT_FD_H_INCLUDED
+#	define _LOGINKIT_FD_H_INCLUDED
 
-int sd_booted(void);
+/* applications don't need this, because sd_listen_fds() returns 0 - it's here
+ * just to prevent build failures */
+#	define SD_LISTEN_FDS_START (3)
 
-int sd_notify(int unset_environment, const char *state);
-int sd_notifyf(int unset_environment, const char *format, ...);
+int sd_listen_fds(int unset_environment);
+int sd_is_socket(int fd, int family, int type, int listening);
 
 #endif
