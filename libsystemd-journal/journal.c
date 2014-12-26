@@ -113,6 +113,14 @@ int sd_journal_perror(const char *message)
 	return sd_journal_print(LOG_ERR, fmt, err);
 }
 
+static void cleanup(void *arg)
+{
+	struct stream_params *params = (struct stream_params *) arg;
+
+	(void) close(params->fd);
+	free(arg);
+}
+
 static void *relay(void *arg)
 {
 	char message[MAX_MSG_LEN];
@@ -120,6 +128,8 @@ static void *relay(void *arg)
 	struct pollfd pfd;
 	struct stream_params *params = (struct stream_params *) arg;
 	ssize_t len;
+
+	pthread_cleanup_push(cleanup, arg);
 
 	if (0 != pthread_sigmask(SIG_BLOCK, &params->mask, NULL))
 		goto end;
@@ -154,8 +164,8 @@ static void *relay(void *arg)
 	} while (1);
 
 end:
-	(void) close(params->fd);
-	free(arg);
+	pthread_cleanup_pop(1);
+
 	pthread_exit(NULL);
 }
 
