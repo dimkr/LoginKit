@@ -205,6 +205,8 @@ int main(int argc, char *argv[])
 	 * running - see LOGIND_RUNNING() */
 	if (-1 == g_mkdir_with_parents("/run/systemd/seats", 0755))
 		goto cleanup;
+	if (-1 == g_mkdir_with_parents("/run/systemd/sessions", 0755))
+		goto cleanup;
 
 	/* normally, /run/systemd/multi-session-x contains a file for each session,
 	 * but since ConsoleKit's session IDs are D-Bus object paths, they contain /
