@@ -45,7 +45,7 @@ install: all
 	$(INSTALL) -m 644 libsystemd-journal/libsystemd-journal.so $(DESTDIR)/$(LIB_DIR)/libsystemd-journal.so.0.1
 	$(LN) -s libsystemd-journal.so.0.1 $(DESTDIR)/$(LIB_DIR)/libsystemd-journal.so.0
 	$(LN) -s libsystemd-journal.so.0.1 $(DESTDIR)/$(LIB_DIR)/libsystemd-journal.so
-	$(INSTALL) -m 644 libsystemd-journal/journal.h $(DESTDIR)/$(INCLUDE_DIR)/systemd/sd-journal.h
+	$(INSTALL) -m 644 libsystemd-journal/sd-journal.h $(DESTDIR)/$(INCLUDE_DIR)/systemd/sd-journal.h
 	$(INSTALL) -m 644 libsystemd-journal/libsystemd-journal.pc $(DESTDIR)/$(LIB_DIR)/pkgconfig/libsystemd-journal.pc
 
 	$(INSTALL) -m 644 libsystemd-login/libsystemd-login.so $(DESTDIR)/$(LIB_DIR)/libsystemd-login.so.0.1
@@ -54,6 +54,8 @@ install: all
 	$(INSTALL) -m 644 libsystemd-login/session.h $(DESTDIR)/$(INCLUDE_DIR)/systemd/session.h
 	$(INSTALL) -m 644 libsystemd-login/seat.h $(DESTDIR)/$(INCLUDE_DIR)/systemd/seat.h
 	$(INSTALL) -m 644 libsystemd-login/pid.h $(DESTDIR)/$(INCLUDE_DIR)/systemd/pid.h
+	$(INSTALL) -m 644 libsystemd-login/uid.h $(DESTDIR)/$(INCLUDE_DIR)/systemd/uid.h
+	$(INSTALL) -m 644 libsystemd-login/monitor.h $(DESTDIR)/$(INCLUDE_DIR)/systemd/monitor.h
 	$(INSTALL) -m 644 libsystemd-login/sd-login.h $(DESTDIR)/$(INCLUDE_DIR)/systemd/sd-login.h
 	$(INSTALL) -m 644 libsystemd-login/libsystemd-login.pc $(DESTDIR)/$(LIB_DIR)/pkgconfig/libsystemd-login.pc
 
