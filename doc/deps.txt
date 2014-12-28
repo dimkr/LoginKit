@@ -1,0 +1,15 @@
+common dependencies:
+	- GLib
+
+libsystemd-journal:
+	- syslogd (any implementation)
+
+loginkitd:
+	- the ConsoleKit daemon (calls its D-Bus methods and subscribes to its signals)
+
+libsystemd-login:
+	- loginkitd (calls its D-Bus methods)
+
+pam-loginkit:
+	- libsystemd-login (uses its API)
+	- the ConsoleKit daemon (calls its D-Bus methods)
