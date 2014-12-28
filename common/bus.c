@@ -26,7 +26,7 @@
 
 #include <glib.h>
 
-#include "bus.h"
+#include <common/bus.h>
 
 static pthread_mutex_t g_lock = PTHREAD_MUTEX_INITIALIZER;
 static GDBusConnection *g_bus = NULL;

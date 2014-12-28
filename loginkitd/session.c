@@ -24,7 +24,7 @@
 
 #include <glib/gstdio.h>
 
-#include "bus.h"
+#include <common/bus.h>
 #include "session.h"
 
 static char *get_session_id(GDBusConnection *bus, const char *session)

@@ -10,7 +10,7 @@ DOC_DIR = $(PREFIX)/share/doc
 LIB_DIR = $(PREFIX)/lib
 INCLUDE_DIR = $(PREFIX)/include
 
-CFLAGS += -I$(PWD)/../common
+CFLAGS += -I$(PWD)/..
 LDFLAGS += -L$(PWD)/../common
 LIBS = -lloginkit-common
 

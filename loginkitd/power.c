@@ -24,7 +24,7 @@
 
 #include <glib/gstdio.h>
 
-#include "bus.h"
+#include <common/bus.h>
 #include "power.h"
 
 static char *handle_can(const char *method)

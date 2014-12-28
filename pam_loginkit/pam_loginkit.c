@@ -38,7 +38,42 @@
 #include <security/pam_ext.h>
 #include <security/pam_modutil.h>
 
-#include "bus.h"
+#include <libsystemd-login/session.h>
+#include <common/bus.h>
+
+static gboolean close_session(GDBusConnection *bus, const char *cookie)
+{
+	GVariant *reply;
+	GError *error = NULL;
+	gboolean ret;
+
+	/* close the ConsoleKit session */
+	reply = g_dbus_connection_call_sync(bus,
+	                                    "org.freedesktop.ConsoleKit",
+	                                    "/org/freedesktop/ConsoleKit/Manager",
+	                                    "org.freedesktop.ConsoleKit.Manager",
+	                                    "CloseSession",
+	                                    g_variant_new("(s)", cookie),
+	                                    G_VARIANT_TYPE("(b)"),
+	                                    G_DBUS_CALL_FLAGS_NONE,
+	                                    -1,
+	                                    NULL,
+	                                    &error);
+	if (NULL == reply) {
+		g_log(G_LOG_DOMAIN,
+		      G_LOG_LEVEL_ERROR,
+		      "CloseSession() failed: %s",
+		      error->message);
+		g_error_free(error);
+		goto end;
+	}
+
+	g_variant_get(reply, "(b)", &ret);
+	g_variant_unref(reply);
+
+end:
+	return ret;
+}
 
 __attribute__((visibility("default")))
 int pam_sm_open_session(pam_handle_t *pamh,
@@ -58,22 +93,23 @@ int pam_sm_open_session(pam_handle_t *pamh,
 	const char *user;
 	struct passwd *passwd;
 	int len;
+	int ret = PAM_SESSION_ERR;
 
 	/* get the user name */
 	if (PAM_SUCCESS != pam_get_user(pamh, &user, NULL))
-		goto failure;
+		goto end;
 
 	pam_syslog(pamh, LOG_DEBUG, "opening a session for %s", user);
 
 	/* get the user ID */
 	passwd = pam_modutil_getpwnam(pamh, user);
 	if (NULL == passwd)
-		goto failure;
+		goto end;
 
 	/* connect to the bus */
 	bus = bus_get();
 	if (NULL == bus)
-		goto failure;
+		goto end;
 
 	/* start a ConsoleKit session for the user and and obtain a session
 	 * cookie */
@@ -138,60 +174,20 @@ int pam_sm_open_session(pam_handle_t *pamh,
 		goto close_session;
 
 	/* get the ID of the seat the session belongs to */
-	reply = g_dbus_connection_call_sync(bus,
-	                                    "org.freedesktop.ConsoleKit",
-	                                    session,
-	                                    "org.freedesktop.ConsoleKit.Session",
-	                                    "GetSeatId",
-	                                    NULL,
-	                                    G_VARIANT_TYPE("(o)"),
-	                                    G_DBUS_CALL_FLAGS_NONE,
-	                                    -1,
-	                                    NULL,
-	                                    &error);
-	if (NULL == reply) {
-		g_log(G_LOG_DOMAIN,
-		      G_LOG_LEVEL_ERROR,
-		      "GetSeatId() failed: %s",
-		      error->message);
-		g_error_free(error);
+	if (0 != sd_session_get_seat(session, &seat))
 		goto close_session;
-	}
-
-	g_variant_get(reply, "(o)", &seat);
-	g_variant_unref(reply);
 
 	/* store the seat ID in the XDG_SEAT_ID environment variable */
 	if (PAM_SUCCESS != pam_misc_setenv(pamh, "XDG_SEAT_ID", seat, 0))
-		goto close_session;
+		goto free_seat;
 
 	/* get the session type */
-	reply = g_dbus_connection_call_sync(bus,
-	                                    "org.freedesktop.ConsoleKit",
-	                                    session,
-	                                    "org.freedesktop.ConsoleKit.Session",
-	                                    "GetSessionType",
-	                                    NULL,
-	                                    G_VARIANT_TYPE("(s)"),
-	                                    G_DBUS_CALL_FLAGS_NONE,
-	                                    -1,
-	                                    NULL,
-	                                    &error);
-	if (NULL == reply) {
-		g_log(G_LOG_DOMAIN,
-		      G_LOG_LEVEL_ERROR,
-		      "GetSessionType() failed: %s",
-		      error->message);
-		g_error_free(error);
-		goto close_session;
-	}
-
-	g_variant_get(reply, "(s)", &type);
-	g_variant_unref(reply);
+	if (0 != sd_session_get_type(session, &type))
+		goto free_seat;
 
 	/* store the session type in the XDG_SESSION_TYPE environment variable */
 	if (PAM_SUCCESS != pam_misc_setenv(pamh, "XDG_SESSION_TYPE", type, 0))
-		goto close_session;
+		goto free_type;
 
 	/* create a temporary directory for the user under /run/user */
 	len = snprintf(path,
@@ -199,49 +195,37 @@ int pam_sm_open_session(pam_handle_t *pamh,
 	               "/run/user/%d",
 	               (unsigned int) passwd->pw_uid);
 	if ((0 >= len) || (sizeof(path) <= len))
-		goto close_session;
+		goto free_type;
 
 	if (-1 == mkdir(path, 0644)) {
 		if (EEXIST != errno)
-			goto close_session;
+			goto free_type;
 	}
 
 	if (-1 == chown(path, passwd->pw_uid, passwd->pw_gid))
-		goto close_session;
+		goto free_type;
 
 	/* store the directory path in XDG_RUNTIME_DIR environment variable */
 	if (PAM_SUCCESS == pam_misc_setenv(pamh, "XDG_RUNTIME_DIR", path, 0))
-		return PAM_SUCCESS;
+		ret = PAM_SUCCESS;
+
+free_type:
+	free(type);
+
+free_seat:
+	free(seat);
 
 close_session:
 	/* upon failure, close the ConsoleKit session */
-	reply = g_dbus_connection_call_sync(bus,
-	                                    "org.freedesktop.ConsoleKit",
-	                                    "/org/freedesktop/ConsoleKit/Manager",
-	                                    "org.freedesktop.ConsoleKit.Manager",
-	                                    "CloseSession",
-	                                    g_variant_new("(s)", cookie),
-	                                    G_VARIANT_TYPE("(b)"),
-	                                    G_DBUS_CALL_FLAGS_NONE,
-	                                    -1,
-	                                    NULL,
-	                                    &error);
-	if (NULL == reply) {
-		g_log(G_LOG_DOMAIN,
-		      G_LOG_LEVEL_ERROR,
-		      "CloseSession() failed: %s",
-		      error->message);
-		g_error_free(error);
-	}
-
-	g_variant_unref(reply);
+	if (PAM_SUCCESS != ret)
+		(void) close_session(bus, cookie);
 
 close_bus:
 	/* disconnect from the bus */
 	bus_close();
 
-failure:
-	return PAM_SESSION_ERR;
+end:
+	return ret;
 }
 
 __attribute__((visibility("default")))
@@ -251,11 +235,9 @@ int pam_sm_close_session(pam_handle_t *pamh,
                          const char **argv)
 {
 	GDBusConnection *bus;
-	GVariant *reply;
-	GError *error = NULL;
 	const char *cookie;
 	gboolean closed;
-	int ret;
+	int ret = PAM_SESSION_ERR;
 
 	/* get the session cookie from the XDG_SESSION_COOKIE environment
 	 * variable created by pam_sm_open_session() */
@@ -269,35 +251,10 @@ int pam_sm_close_session(pam_handle_t *pamh,
 		goto end;
 
 	/* close the ConsoleKit session */
-	reply = g_dbus_connection_call_sync(bus,
-	                                    "org.freedesktop.ConsoleKit",
-	                                    "/org/freedesktop/ConsoleKit/Manager",
-	                                    "org.freedesktop.ConsoleKit.Manager",
-	                                    "CloseSession",
-	                                    g_variant_new("(s)", cookie),
-	                                    G_VARIANT_TYPE("(b)"),
-	                                    G_DBUS_CALL_FLAGS_NONE,
-	                                    -1,
-	                                    NULL,
-	                                    &error);
-	if (NULL == reply) {
-		g_log(G_LOG_DOMAIN,
-		      G_LOG_LEVEL_ERROR,
-		      "CloseSession() failed: %s",
-		      error->message);
-		g_error_free(error);
-		goto close_bus;
-	}
+	closed = close_session(bus, cookie);
+	if (TRUE == closed)
+		ret = PAM_SUCCESS;
 
-	g_variant_get(reply, "(b)", &closed);
-	g_variant_unref(reply);
-
-	if (FALSE == closed)
-		goto close_bus;
-
-	ret = PAM_SUCCESS;
-
-close_bus:
 	/* disconnect from the bus */
 	bus_close();
 

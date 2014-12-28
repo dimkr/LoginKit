@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-#include "bus.h"
+#include <common/bus.h>
 
 __attribute__((destructor))
 static void on_dlclose(void)

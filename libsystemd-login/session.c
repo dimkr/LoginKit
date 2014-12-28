@@ -26,7 +26,7 @@
 #include <string.h>
 #include <errno.h>
 
-#include "bus.h"
+#include <common/bus.h>
 #include "pid.h"
 #include "session.h"
 

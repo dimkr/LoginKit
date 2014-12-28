@@ -24,7 +24,7 @@
 
 #include <glib/gstdio.h>
 
-#include "bus.h"
+#include <common/bus.h>
 #include "seat.h"
 #include "session.h"
 #include "power.h"

@@ -1,6 +1,6 @@
 #include <errno.h>
 
-#include "bus.h"
+#include <common/bus.h>
 #include "session.h"
 #include "uid.h"
 

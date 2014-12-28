@@ -30,7 +30,7 @@
 
 #include <glib/gstdio.h>
 
-#include "bus.h"
+#include <common/bus.h>
 #include "seat.h"
 
 char *seat_get_id(GDBusConnection *bus, const char *seat)
