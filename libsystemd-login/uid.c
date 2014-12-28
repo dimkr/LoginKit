@@ -21,6 +21,8 @@ int sd_uid_get_seats(uid_t uid,
 	gsize i;
 	int ret = -EINVAL;
 
+	g_assert(NULL != seats);
+
 	g_log(G_LOG_DOMAIN,
 	      G_LOG_LEVEL_INFO,
 	      "listing the sessions of %lu",
@@ -42,8 +44,11 @@ int sd_uid_get_seats(uid_t uid,
 	                                    NULL,
 	                                    &error);
 	if (NULL == reply) {
-		if (NULL != error)
-			g_error_free(error);
+		g_log(G_LOG_DOMAIN,
+		      G_LOG_LEVEL_ERROR,
+		      "GetSessionsForUnixUser() failed: %s",
+		      error->message);
+		g_error_free(error);
 		goto end;
 	}
 
@@ -73,20 +78,23 @@ int sd_uid_get_seats(uid_t uid,
 		}
 
 		seat_reply = g_dbus_connection_call_sync(
-		                                      bus,
-		                                      "org.freedesktop.ConsoleKit",
-		                                      session,
-		                                      "org.freedesktop.ConsoleKit.Session",
-		                                      "GetSeatId",
-		                                      NULL,
-		                                      G_VARIANT_TYPE("(o)"),
-		                                      G_DBUS_CALL_FLAGS_NONE,
-		                                      -1,
-		                                      NULL,
-		                                      &error);
+		                                   bus,
+		                                   "org.freedesktop.ConsoleKit",
+		                                   session,
+		                                   "org.freedesktop.ConsoleKit.Session",
+		                                   "GetSeatId",
+		                                   NULL,
+		                                   G_VARIANT_TYPE("(o)"),
+		                                   G_DBUS_CALL_FLAGS_NONE,
+		                                   -1,
+		                                   NULL,
+		                                   &error);
 		if (NULL == seat_reply) {
-			if (NULL != error)
-				g_error_free(error);
+			g_log(G_LOG_DOMAIN,
+			      G_LOG_LEVEL_ERROR,
+			      "GetSeatId() failed: %s",
+			      error->message);
+			g_error_free(error);
 			g_free(*seats);
 			*seats = NULL;
 			goto end;

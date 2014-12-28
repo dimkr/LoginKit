@@ -50,8 +50,12 @@ static char *handle_can(const char *method)
 	                                    NULL,
 	                                    &error);
 	if (NULL == reply) {
-		if (NULL != error)
-			g_error_free(error);
+		g_log(G_LOG_DOMAIN,
+		      G_LOG_LEVEL_ERROR,
+		      "%s() failed: %s",
+		      method,
+		      error->message);
+		g_error_free(error);
 		return NULL;
 	}
 
@@ -194,20 +198,22 @@ gboolean on_handle_inhibit(LoginKitManager *interface,
 	                                    -1,
 	                                    NULL,
 	                                    &error);
-	if (NULL != reply) {
-		login_kit_manager_complete_inhibit(interface,
-		                                   invocation,
-		                                   g_variant_new("(h)", ret));
-		return TRUE;
-	}
-
-	if (NULL != error)
+	if (NULL == reply) {
+		g_log(G_LOG_DOMAIN,
+		      G_LOG_LEVEL_ERROR,
+		      "Inhibit() failed: %s",
+		      error->message);
 		g_error_free(error);
+		return FALSE;
+	}
 
 	g_variant_get(reply, "(h)", &ret);
 	g_variant_unref(reply);
 
-	return FALSE;
+	login_kit_manager_complete_inhibit(interface,
+	                                   invocation,
+	                                   g_variant_new("(h)", ret));
+	return TRUE;
 }
 
 static gboolean handle_action(const char *method, const gboolean interactive)
@@ -232,8 +238,12 @@ static gboolean handle_action(const char *method, const gboolean interactive)
 	                                    NULL,
 	                                    &error);
 	if (NULL == reply) {
-		if (NULL != error)
-			g_error_free(error);
+		g_log(G_LOG_DOMAIN,
+		      G_LOG_LEVEL_ERROR,
+		      "%s() failed: %s",
+		      method,
+		      error->message);
+		g_error_free(error);
 		return FALSE;
 	}
 

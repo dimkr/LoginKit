@@ -7,10 +7,10 @@ LIB = libsystemd-daemon.so
 all: $(LIB) libsystemd-daemon.pc
 
 %.o: %.c
-	$(CC) -c -o $@ $< $(CFLAGS)
+	$(CC) -c -o $@ $< $(CFLAGS) $(GLIB_CFLAGS)
 
 $(LIB): $(OBJS) compat.sym
-	$(CC) -o $@ $(OBJS) -shared $(LDFLAGS) $(LIBS)
+	$(CC) -o $@ $(OBJS) -shared $(LDFLAGS) $(LIBS) $(GLIB_LIBS)
 
 libsystemd-daemon.pc: libsystemd-daemon.pc.in
 	sed -e s~@PREFIX@~$(PREFIX)~g \

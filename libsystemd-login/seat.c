@@ -48,19 +48,34 @@ int sd_seat_get_sessions(const char *seat,
 	GDBusConnection *bus;
 	GVariant *reply;
 	GError *error = NULL;
+	char *real_seat;
 	uid_t owner;
+	gsize i;
+	gsize count;
 	int ret = -EINVAL;
-	unsigned i;
 
-	g_log(G_LOG_DOMAIN, G_LOG_LEVEL_INFO, "listing the sessions on %s", seat);
+	if (NULL != seat)
+		real_seat = (char *) seat;
+	else {
+		ret = sd_session_get_seat(NULL, &real_seat);
+		if (0 != ret)
+			return ret;
+	}
+
+	g_log(G_LOG_DOMAIN,
+	      G_LOG_LEVEL_INFO,
+	      "listing the sessions on %s",
+	      real_seat);
 
 	bus = bus_get();
-	if (NULL == bus)
+	if (NULL == bus) {
+		ret = -EINVAL;
 		goto end;
+	}
 
 	reply = g_dbus_connection_call_sync(bus,
 	                                    "org.freedesktop.ConsoleKit",
-	                                    seat,
+	                                    real_seat,
 	                                    "org.freedesktop.ConsoleKit.Seat",
 	                                    "GetSessions",
 	                                    NULL,
@@ -70,37 +85,56 @@ int sd_seat_get_sessions(const char *seat,
 	                                    NULL,
 	                                    &error);
 	if (NULL == reply) {
-		if (NULL != error)
-			g_error_free(error);
+		g_log(G_LOG_DOMAIN,
+		      G_LOG_LEVEL_ERROR,
+		      "GetSessions() failed: %s",
+		      error->message);
+		g_error_free(error);
+		ret = -EINVAL;
 		goto end;
 	}
 
 	array = g_variant_get_child_value(reply, 0);
 	g_variant_iter_init(&iter, array);
 
-	*n_uids = (unsigned) g_variant_iter_n_children(&iter);
-	*sessions = g_new(char *, 1 + (*n_uids));
-	*uid = g_new(uid_t, *n_uids);
+	count = g_variant_iter_n_children(&iter);
 
-	for (i = 0; (*n_uids) > i; ++i) {
+	if (NULL != n_uids)
+		*n_uids = (unsigned) count;
+
+	if (NULL != sessions)
+		*sessions = g_new(char *, 1 + (*n_uids));
+
+	if (NULL != uid)
+		*uid = g_new(uid_t, *n_uids);
+
+	for (i = 0; count > i; ++i) {
 		(void) g_variant_iter_loop(&iter, "o", &session, NULL);
 		ret = sd_session_get_uid(session, &owner);
 		if (0 != ret) {
-			g_free(*sessions);
-			g_free(*uid);
+			if (NULL != sessions)
+				g_free(*sessions);
+
+			if (NULL != uid)
+				g_free(*uid);
+
 			*sessions = NULL;
 			*uid = NULL;
-			break;
+			goto end;
 		}
 
-		*sessions[i] = session;
-		*uid[i] = owner;
+		if (NULL != sessions)
+			*sessions[i] = session;
+
+		if (NULL != uid)
+			*uid[i] = owner;
 	}
 
 	ret = 0;
 
 	/* the session IDs array must have a terminating NULL sentinel */
-	sessions[i] = NULL;
+	if (NULL != sessions)
+		sessions[i] = NULL;
 
 	g_variant_unref(reply);
 	g_variant_unref(array);

@@ -45,8 +45,11 @@ static char *get_session_id(GDBusConnection *bus, const char *session)
 	                                    NULL,
 	                                    &error);
 	if (NULL == reply) {
-		if (NULL != error)
-			g_error_free(error);
+		g_log(G_LOG_DOMAIN,
+		      G_LOG_LEVEL_ERROR,
+		      "GetId() failed: %s",
+		      error->message);
+		g_error_free(error);
 		return NULL;
 	}
 
@@ -80,8 +83,11 @@ static char *get_session_by_id(GDBusConnection *bus, const char *id)
 	                                    NULL,
 	                                    &error);
 	if (NULL == reply) {
-		if (NULL != error)
-			g_error_free(error);
+		g_log(G_LOG_DOMAIN,
+		      G_LOG_LEVEL_ERROR,
+		      "GetSessions() failed: %s",
+		      error->message);
+		g_error_free(error);
 		return NULL;
 	}
 
@@ -133,8 +139,12 @@ static gboolean session_action(const char *id, const char *method)
 	                                    NULL,
 	                                    &error);
 	if (NULL == reply) {
-		if (NULL != error)
-			g_error_free(error);
+		g_log(G_LOG_DOMAIN,
+		      G_LOG_LEVEL_ERROR,
+		      "%s() failed: %s",
+		      method,
+		      error->message);
+		g_error_free(error);
 		return FALSE;
 	}
 

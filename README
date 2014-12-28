@@ -33,9 +33,9 @@ To build LoginKit:
 Usage
 =====
 
+  - Replace systemd's libsystemd*.so.0 with LoginKit's ones
   - Kill systemd-logind
   - Run loginkitd (quickly, before logind is restarted)
-  - Replace systemd's libsystemd.so.0 with LoginKit's one
   - Add pam_loginkit.so to PAM's modules directory
   - Replace "pam_systemd" with "pam_loginkit", in PAM's configuration
 

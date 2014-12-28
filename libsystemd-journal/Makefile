@@ -10,10 +10,10 @@ LIB = libsystemd-journal.so
 all: $(LIB) libsystemd-journal.pc
 
 %.o: %.c
-	$(CC) -c -o $@ $< $(CFLAGS)
+	$(CC) -c -o $@ $< $(CFLAGS) $(GLIB_CFLAGS)
 
 $(LIB): $(OBJS) compat.sym
-	$(CC) -o $@ $(OBJS) -shared $(LDFLAGS) $(LIBS)
+	$(CC) -o $@ $(OBJS) -shared $(LDFLAGS) $(LIBS) $(GLIB_LIBS)
 
 libsystemd-journal.pc: libsystemd-journal.pc.in
 	sed -e s~@PREFIX@~$(PREFIX)~g \

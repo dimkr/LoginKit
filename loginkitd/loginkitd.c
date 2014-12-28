@@ -145,10 +145,8 @@ static void on_bus_acquired(GDBusConnection *bus,
 	if (!g_dbus_interface_skeleton_export(G_DBUS_INTERFACE_SKELETON(interface),
 	                                      bus,
 	                                      "/org/freedesktop/login1",
-	                                      &error)) {
-		if (NULL != error)
-			g_error_free(error);
-	}
+	                                      &error))
+		g_error_free(error);
 }
 
 

@@ -94,8 +94,11 @@ int pam_sm_open_session(pam_handle_t *pamh,
 	                                    NULL,
 	                                    &error);
 	if (NULL == reply) {
-		if (NULL != error)
-			g_error_free(error);
+		g_log(G_LOG_DOMAIN,
+		      G_LOG_LEVEL_ERROR,
+		      "OpenSessionWithParameters() failed: %s",
+		      error->message);
+		g_error_free(error);
 		goto close_bus;
 	}
 
@@ -119,8 +122,11 @@ int pam_sm_open_session(pam_handle_t *pamh,
 	                                    NULL,
 	                                    &error);
 	if (NULL == reply) {
-		if (NULL != error)
-			g_error_free(error);
+		g_log(G_LOG_DOMAIN,
+		      G_LOG_LEVEL_ERROR,
+		      "GetSessionForCookie() failed: %s",
+		      error->message);
+		g_error_free(error);
 		goto close_session;
 	}
 
@@ -144,8 +150,11 @@ int pam_sm_open_session(pam_handle_t *pamh,
 	                                    NULL,
 	                                    &error);
 	if (NULL == reply) {
-		if (NULL != error)
-			g_error_free(error);
+		g_log(G_LOG_DOMAIN,
+		      G_LOG_LEVEL_ERROR,
+		      "GetSeatId() failed: %s",
+		      error->message);
+		g_error_free(error);
 		goto close_session;
 	}
 
@@ -169,8 +178,11 @@ int pam_sm_open_session(pam_handle_t *pamh,
 	                                    NULL,
 	                                    &error);
 	if (NULL == reply) {
-		if (NULL != error)
-			g_error_free(error);
+		g_log(G_LOG_DOMAIN,
+		      G_LOG_LEVEL_ERROR,
+		      "GetSessionType() failed: %s",
+		      error->message);
+		g_error_free(error);
 		goto close_session;
 	}
 
@@ -215,8 +227,11 @@ close_session:
 	                                    NULL,
 	                                    &error);
 	if (NULL == reply) {
-		if (NULL != error)
-			g_error_free(error);
+		g_log(G_LOG_DOMAIN,
+		      G_LOG_LEVEL_ERROR,
+		      "CloseSession() failed: %s",
+		      error->message);
+		g_error_free(error);
 	}
 
 	g_variant_unref(reply);
@@ -266,8 +281,11 @@ int pam_sm_close_session(pam_handle_t *pamh,
 	                                    NULL,
 	                                    &error);
 	if (NULL == reply) {
-		if (NULL != error)
-			g_error_free(error);
+		g_log(G_LOG_DOMAIN,
+		      G_LOG_LEVEL_ERROR,
+		      "CloseSession() failed: %s",
+		      error->message);
+		g_error_free(error);
 		goto close_bus;
 	}
 

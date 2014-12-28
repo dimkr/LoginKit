@@ -53,8 +53,11 @@ char *seat_get_id(GDBusConnection *bus, const char *seat)
 	                                    NULL,
 	                                    &error);
 	if (NULL == reply) {
-		if (NULL != error)
-			g_error_free(error);
+		g_log(G_LOG_DOMAIN,
+		      G_LOG_LEVEL_ERROR,
+		      "GetId() failed: %s",
+		      error->message);
+		g_error_free(error);
 		return NULL;
 	}
 
@@ -102,8 +105,11 @@ gboolean on_handle_list_seats(LoginKitManager *interface,
 	                                    NULL,
 	                                    &error);
 	if (NULL == reply) {
-		if (NULL != error)
-			g_error_free(error);
+		g_log(G_LOG_DOMAIN,
+		      G_LOG_LEVEL_ERROR,
+		      "GetSeats() failed: %s",
+		      error->message);
+		g_error_free(error);
 		return FALSE;
 	}
 

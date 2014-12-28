@@ -33,6 +33,8 @@
 #include <pthread.h>
 #include <unistd.h>
 
+#include <glib.h>
+
 #include "sd-journal.h"
 
 /*
@@ -45,6 +47,8 @@
 __attribute__((visibility("default")))
 int sd_journal_printv(int priority, const char *format, va_list ap)
 {
+	g_assert(NULL != format);
+
 	vsyslog(priority, format, ap);
 	return 0;
 }
@@ -73,7 +77,11 @@ int sd_journal_print_with_location(int priority,
 	char fmt[MAX_FMT_LEN];
 	va_list ap;
 	int len;
-	int ret;
+
+	g_assert(NULL != file);
+	g_assert(NULL != line);
+	g_assert(NULL != func);
+	g_assert(NULL != format);
 
 	len = snprintf(fmt,
 	               sizeof(fmt),
@@ -86,10 +94,10 @@ int sd_journal_print_with_location(int priority,
 		return -EINVAL;
 
 	va_start(ap, format);
-	ret = sd_journal_printv(priority, fmt, ap);
+	vsyslog(priority, fmt, ap);
 	va_end(ap);
 
-	return ret;
+	return 0;
 }
 
 __attribute__((visibility("default")))
@@ -98,6 +106,8 @@ int sd_journal_perror(const char *message)
 	char fmt[MAX_FMT_LEN];
 	int len;
 	char *err;
+
+	g_assert(0 != errno);
 
 	err = strerror(errno);
 	if (NULL == err)
@@ -128,6 +138,7 @@ static void *relay(void *arg)
 	struct pollfd pfd;
 	struct stream_params *params = (struct stream_params *) arg;
 	ssize_t len;
+	int priority;
 
 	pthread_cleanup_push(cleanup, arg);
 
@@ -149,14 +160,25 @@ static void *relay(void *arg)
 			break;
 		message[len] = '\0';
 
-		/* if the message begins <%d> (one of the SD_* constants), strip it */
-		off = strchr(message, '>');
-		if (NULL == off)
+		/* if the message begins with <%d> (one of the SD_* constants), extract
+		 * the priority and strip it */
+		if (0 != params->level_prefix) {
+			priority = params->priority;
 			off = message;
-		else
-			++off;
+		}
+		else {
+			off = strchr(message, '>');
+			if (NULL == off) {
+				priority = params->priority;
+				off = message;
+			}
+			else {
+				priority = (off - 1)[0] - '0';
+				++off;
+			}
+		}
 
-		if (0 != sd_journal_print(params->priority,
+		if (0 != sd_journal_print(priority,
 		                          "%s: %s",
 		                          params->identifier,
 		                          off))
@@ -180,6 +202,11 @@ int sd_journal_stream_fd(const char *identifier,
 	pthread_t id;
 	int ret = -ENOMEM;
 
+	g_assert(NULL != identifier);
+	g_assert(LOG_DEBUG <= priority);
+	g_assert(LOG_DEBUG <= priority);
+	g_assert(LOG_EMERG >= priority);
+
 	if (0 != pthread_attr_init(&attr))
 		goto end;
 
@@ -202,6 +229,7 @@ int sd_journal_stream_fd(const char *identifier,
 	params->identifier = identifier;
 	params->priority = priority;
 	params->fd = fds[1];
+	params->level_prefix = level_prefix;
 	if (0 != pthread_create(&id, &attr, relay, (void *) params))
 		goto free_params;
 

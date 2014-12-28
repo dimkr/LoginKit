@@ -42,11 +42,11 @@ GDBusConnection *bus_get(void)
 		g_log(G_LOG_DOMAIN, G_LOG_LEVEL_INFO, "connecting to the system bus");
 		g_bus = g_bus_get_sync(G_BUS_TYPE_SYSTEM, NULL, &error);
 		if (NULL == g_bus) {
-			if (NULL != error) 
-				g_error_free(error);
 			g_log(G_LOG_DOMAIN,
 			      G_LOG_LEVEL_CRITICAL,
-			      "failed to connect to the system bus");
+			      "failed to connect to the system bus: %s",
+			      error->message);
+			g_error_free(error);
 		}
 	}
 

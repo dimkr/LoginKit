@@ -54,8 +54,13 @@ static char *get_session_by_pid(GDBusConnection *bus, pid_t pid)
 	                                    NULL,
 	                                    &error);
 
-	if (NULL == reply)
+	if (NULL == reply) {
+		g_log(G_LOG_DOMAIN,
+		      G_LOG_LEVEL_ERROR,
+		      "GetSessionForUnixProcess() failed: %s",
+		      error->message);
 		g_error_free(error);
+	}
 	else {
 		g_variant_get(reply, "(o)", &ret);
 		g_variant_unref(reply);
@@ -68,6 +73,8 @@ __attribute__((visibility("default")))
 int sd_pid_get_session(pid_t pid, char **session)
 {
 	GDBusConnection *bus;
+
+	g_assert(NULL != session);
 
 	bus = bus_get();
 	if (NULL == bus) {
@@ -96,6 +103,8 @@ int sd_pid_get_owner_uid(pid_t pid, uid_t *uid)
 	GError *error = NULL;
 	char *session;
 
+	g_assert(NULL != uid);
+
 	bus = bus_get();
 	if (NULL == bus)
 		return -EINVAL;
@@ -118,8 +127,11 @@ int sd_pid_get_owner_uid(pid_t pid, uid_t *uid)
 	                                    NULL,
 	                                    &error);
 	if (NULL == reply) {
-		if (NULL != error)
-			g_error_free(error);
+		g_log(G_LOG_DOMAIN,
+		      G_LOG_LEVEL_ERROR,
+		      "GetUnixUser() failed: %s",
+		      error->message);
+		g_error_free(error);
 		return -EINVAL;
 	}
 
@@ -136,6 +148,8 @@ int sd_pid_get_machine_name(pid_t pid, char **name)
 	GVariant *reply;
 	GError *error = NULL;
 	char *session;
+
+	g_assert(NULL != name);
 
 	*name = NULL;
 
@@ -164,8 +178,11 @@ int sd_pid_get_machine_name(pid_t pid, char **name)
 	                                    NULL,
 	                                    &error);
 	if (NULL == reply) {
-		if (NULL != error)
-			g_error_free(error);
+		g_log(G_LOG_DOMAIN,
+		      G_LOG_LEVEL_ERROR,
+		      "GetRemoteHostName() failed: %s",
+		      error->message);
+		g_error_free(error);
 		return -EINVAL;
 	}
 
@@ -178,6 +195,8 @@ int sd_pid_get_machine_name(pid_t pid, char **name)
 __attribute__((visibility("default")))
 int sd_pid_get_unit(pid_t pid, char **unit)
 {
+	g_assert(NULL != unit);
+
 	/* quote from the man page: "For processes not being part of a systemd
 	 * system unit this function will fail." */
 	*unit = NULL;
@@ -187,6 +206,8 @@ int sd_pid_get_unit(pid_t pid, char **unit)
 __attribute__((visibility("default")))
 int sd_pid_get_user_unit(pid_t pid, char **unit)
 {
+	g_assert(NULL != unit);
+
 	*unit = NULL;
 	return -EINVAL;
 }

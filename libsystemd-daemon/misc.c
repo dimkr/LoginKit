@@ -22,6 +22,10 @@
  * THE SOFTWARE.
  */
 
+#include <stddef.h>
+
+#include <glib.h>
+
 #include "misc.h"
 
 __attribute__((visibility("default")))
@@ -37,11 +41,15 @@ int sd_booted(void)
 __attribute__((visibility("default")))
 int sd_notify(int unset_environment, const char *state)
 {
+	g_assert(NULL != state);
+
 	return 0;
 }
 
 __attribute__((visibility("default")))
 int sd_notifyf(int unset_environment, const char *format, ...)
 {
+	g_assert(NULL != format);
+
 	return 0;
 }

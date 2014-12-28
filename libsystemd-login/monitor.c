@@ -41,6 +41,8 @@ int sd_login_monitor_new(const char *category,
 	int len;
 	const char *real_category;
 
+	g_assert(NULL != ret);
+
 	*ret = malloc(sizeof(sd_login_monitor));
 	if (NULL == *ret)
 		goto error;
@@ -85,6 +87,8 @@ error:
 __attribute__((visibility("default")))
 sd_login_monitor *sd_login_monitor_unref(sd_login_monitor *m)
 {
+	g_assert(NULL != m);
+
 	g_log(G_LOG_DOMAIN, G_LOG_LEVEL_INFO, "closing monitor %d", m->fd);
 	(void) inotify_rm_watch(m->fd, m->wd);
 	free((void *) m);
@@ -95,6 +99,8 @@ sd_login_monitor *sd_login_monitor_unref(sd_login_monitor *m)
 __attribute__((visibility("default")))
 int sd_login_monitor_flush(sd_login_monitor *m)
 {
+	g_assert(NULL != m);
+
 	g_log(G_LOG_DOMAIN, G_LOG_LEVEL_INFO, "flushing monitor %d", m->fd);
 	return 0;
 }
@@ -102,6 +108,8 @@ int sd_login_monitor_flush(sd_login_monitor *m)
 __attribute__((visibility("default")))
 int sd_login_monitor_get_fd(sd_login_monitor *m)
 {
+	g_assert(NULL != m);
+
 	g_log(G_LOG_DOMAIN,
 	      G_LOG_LEVEL_INFO,
 	      "getting the file descriptor of monitor %d",
@@ -112,6 +120,8 @@ int sd_login_monitor_get_fd(sd_login_monitor *m)
 __attribute__((visibility("default")))
 int sd_login_monitor_get_events(sd_login_monitor *m)
 {
+	g_assert(NULL != m);
+
 	g_log(G_LOG_DOMAIN,
 	      G_LOG_LEVEL_INFO,
 	      "getting the event mask of monitor %d",
@@ -122,6 +132,9 @@ int sd_login_monitor_get_events(sd_login_monitor *m)
 __attribute__((visibility("default")))
 int sd_login_monitor_get_timeout(sd_login_monitor *m, uint64_t *timeout_usec)
 {
+	g_assert(NULL != m);
+	g_assert(NULL != timeout_usec);
+
 	g_log(G_LOG_DOMAIN,
 	      G_LOG_LEVEL_INFO,
 	      "getting the event timeout of monitor %d",

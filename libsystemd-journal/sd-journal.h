@@ -36,6 +36,7 @@ struct stream_params {
 	const char *identifier;
 	int priority;
 	int fd;
+	int level_prefix;
 };
 
 int sd_journal_printv(int priority, const char *format, va_list ap);
