@@ -5,10 +5,10 @@ PKG_CONFIG ?= pkg-config
 
 PREFIX ?= /usr
 
-SBIN_DIR = $(PREFIX)/sbin
-DOC_DIR = $(PREFIX)/share/doc
-LIB_DIR = $(PREFIX)/lib
-INCLUDE_DIR = $(PREFIX)/include
+SBIN_DIR ?= $(PREFIX)/sbin
+DOC_DIR ?= $(PREFIX)/share/doc
+LIB_DIR ?= $(PREFIX)/lib
+INCLUDE_DIR ?= $(PREFIX)/include
 
 CFLAGS += -I$(PWD)/..
 LDFLAGS += -L$(PWD)/../common
