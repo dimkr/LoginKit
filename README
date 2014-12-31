@@ -25,7 +25,8 @@ LoginKit requires GLib, PAM and ConsoleKit2.
 Building
 ========
 
-On Debian, install libpam0g-dev and libglib2.0-dev.
+On Debian, install libpam0g-dev and libglib2.0-dev:
+   apt-get install -y libpam0g-dev libglib2.0-dev
 
 To build LoginKit:
   make
