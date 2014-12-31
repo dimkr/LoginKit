@@ -1,8 +1,8 @@
 include ../Makefile.common
 
 CFLAGS += -pthread
-LDFLAGS += -pthread -L../libsystemd-login
-LIBS += -lsystemd-login
+LDFLAGS += -pthread -L../libloginkit-login
+LIBS += -lloginkit-login
 
 LIB = pam_loginkit.so
 

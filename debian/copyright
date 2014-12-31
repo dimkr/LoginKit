@@ -1,6 +1,6 @@
 Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: loginkit
-Source: https://github.com/dimkr/LoginKit
+Source: https://git.devuan.org/pkgs-utopia-sobstitution/loginkit
 
 Files: *
 Copyright: 2014 Dima Krasner <dima@dimakrasner.com>

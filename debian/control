@@ -3,11 +3,10 @@ Section: admin
 Priority: optional
 Maintainer: Dima Krasner <dima@dimakrasner.com>
 Build-Depends: debhelper (>= 8.0.0), libglib2.0-dev, libpam0g-dev, pkg-config
-Build-conflicts: libsystemd-dev, libsystemd0, libsystemd-daemon0, libsystemd-journal0, libsystemd-journal-dev, libsystemd-login0, libsystemd-login-dev
 Standards-Version: 3.9.4
-Homepage: https://github.com/dimkr/LoginKit
-Vcs-Git: git://github.com/dimkr/LoginKit.git
-Vcs-Browser: https://github.com/dimkr/LoginKit
+Homepage: https://git.devuan.org/pkgs-utopia-sobstitution/loginkit
+Vcs-Git: https://git.devuan.org/pkgs-utopia-sobstitution/loginkit.git
+Vcs-Browser: https://git.devuan.org/pkgs-utopia-sobstitution/loginkit
 
 Package: loginkit
 Architecture: any
@@ -26,9 +25,9 @@ Description: LoginKit PAM module
  LoginKit is a compatible, yet standalone alternative to logind and libsystemd.
  .
  This package provides the LoginKit PAM module.
-Conflicts: systemd
+Conflicts: libpam-systemd
 
-Package: loginkit-libs
+Package: libloginkit
 Section: libs
 Architecture: any
 Depends: loginkit (= ${binary:Version}), libpam-loginkit (= ${binary:Version}), ${shlibs:Depends}
@@ -36,12 +35,11 @@ Description: LoginKit development files
  LoginKit is a compatible, yet standalone alternative to logind and libsystemd.
  .
  This package provides the LoginKit libraries.
-Conflicts: libsystemd0, libsystemd-daemon0, libsystemd-journal0, libsystemd-login0
 
-Package: loginkit-libs-dev
+Package: libloginkit-dev
 Section: libs
 Architecture: any
-Depends: loginkit (= ${binary:Version}), libpam-loginkit (= ${binary:Version}), libglib2.0-dev
+Depends: libloginkit (= ${binary:Version}), libpam-loginkit (= ${binary:Version}), libglib2.0-dev
 Description: LoginKit development files
  LoginKit is a compatible, yet standalone alternative to logind and libsystemd.
  .

@@ -27,8 +27,8 @@
 
 #	include <syslog.h>
 
-#	include "misc.h"
-#	include "fd.h"
+#	include <libloginkit-daemon/misc.h>
+#	include <libloginkit-daemon/fd.h>
 
 #	define SD_PASTE(x) #x
 #	define SD_STR(x) SD_PASTE(x)

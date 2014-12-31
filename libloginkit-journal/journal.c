@@ -35,7 +35,7 @@
 
 #include <glib.h>
 
-#include "sd-journal.h"
+#include "journal.h"
 
 /*
  * the journal_print documentation says: "syslog(3) and sd_journal_print() may

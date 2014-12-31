@@ -38,7 +38,7 @@
 #include <security/pam_ext.h>
 #include <security/pam_modutil.h>
 
-#include <libsystemd-login/session.h>
+#include <libloginkit-login/session.h>
 #include <common/bus.h>
 
 static gboolean close_session(GDBusConnection *bus, const char *cookie)

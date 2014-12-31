@@ -25,10 +25,10 @@
 #ifndef _LOGINKIT_LOGIN_H_INCLUDED
 #	define _LOGINKIT_LOGIN_H_INCLUDED
 
-#	include "pid.h"
-#	include "seat.h"
-#	include "session.h"
-#	include "uid.h"
-#	include "monitor.h"
+#	include <libloginkit-login/pid.h>
+#	include <libloginkit-login/seat.h>
+#	include <libloginkit-login/session.h>
+#	include <libloginkit-login/uid.h>
+#	include <libloginkit-login/monitor.h>
 
 #endif
