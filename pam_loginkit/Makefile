@@ -1,8 +1,8 @@
 include ../Makefile.common
 
 CFLAGS += -pthread
-LDFLAGS += -pthread -L../libloginkit-login
-LIBS += -lloginkit-login
+LDFLAGS += -pthread -L../libloginkit
+LIBS += -lloginkit
 
 LIB = pam_loginkit.so
 

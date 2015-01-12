@@ -32,7 +32,7 @@ libloginkit/libloginkit.so: libloginkit-daemon/libloginkit-daemon.so \
                           libloginkit-login/libloginkit-login.so
 	cd libloginkit; $(MAKE)
 
-pam_loginkit/pam_loginkit.so: common/libloginkit-common.a
+pam_loginkit/pam_loginkit.so: libloginkit/libloginkit.so
 	cd pam_loginkit; $(MAKE)
 
 install: all
