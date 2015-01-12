@@ -33,5 +33,8 @@ int sd_session_get_type(const char *session, char **type);
 int sd_session_get_class(const char *session, char **class);
 int sd_session_get_seat(const char *session, char **seat);
 int sd_session_get_uid(const char *session, uid_t *uid);
+int sd_session_get_display(const char *session, char **display);
+
+int sd_get_sessions(char ***sessions);
 
 #endif

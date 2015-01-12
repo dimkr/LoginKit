@@ -42,6 +42,7 @@ LIBSYSTEMD_209 {
 		sd_session_is_active;
 		sd_session_get_seat;
 		sd_session_get_uid;
+		sd_session_get_display;
 		sd_seat_can_multi_session;
 		sd_seat_get_sessions;
 		sd_login_monitor_new;
@@ -56,4 +57,5 @@ LIBSYSTEMD_209 {
 		sd_login_monitor_get_timeout;
 		sd_pid_get_machine_name;
 		sd_uid_get_seats;
+		sd_get_sessions;
 };

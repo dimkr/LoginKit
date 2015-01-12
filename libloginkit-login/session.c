@@ -254,6 +254,56 @@ int sd_session_get_uid(const char *session, uid_t *uid)
 	return wrapper(session, uid, (const get_t) get_uid);
 }
 
+static int get_display(const char *session, char **display)
+{
+	GDBusConnection *bus;
+	GVariant *reply;
+	GError *error = NULL;
+
+	g_assert(NULL != display);
+
+	g_log(G_LOG_DOMAIN, G_LOG_LEVEL_INFO, "getting the display of %s", session);
+
+	bus = bus_get();
+	if (NULL == bus)
+		return -EINVAL;
+
+	reply = g_dbus_connection_call_sync(bus,
+	                                    "org.freedesktop.ConsoleKit",
+	                                    session,
+	                                    "org.freedesktop.ConsoleKit.Session",
+	                                    "GetX11Display",
+	                                    NULL,
+	                                    G_VARIANT_TYPE("(s)"),
+	                                    G_DBUS_CALL_FLAGS_NONE,
+	                                    -1,
+	                                    NULL,
+	                                    &error);
+	if (NULL == reply) {
+		g_log(G_LOG_DOMAIN,
+		      G_LOG_LEVEL_ERROR,
+		      "GetX11Display() failed: %s",
+		      error->message);
+		g_error_free(error);
+		return -EINVAL;
+	}
+
+	g_variant_get(reply, "(s)", display);
+	g_variant_unref(reply);
+
+	*display = strdup(*display);
+	if (NULL == *display)
+		return -ENOMEM;
+
+	return 0;
+}
+
+__attribute__((visibility("default")))
+int sd_session_get_display(const char *session, char **display)
+{
+	return wrapper(session, display, (const get_t) get_display);
+}
+
 __attribute__((visibility("default")))
 int sd_session_get_state(const char *session, char **state)
 {
@@ -295,4 +345,70 @@ int sd_session_get_class(const char *session, char **class)
 		return -ENOMEM;
 
 	return 0;
+}
+
+__attribute__((visibility("default")))
+int sd_get_sessions(char ***sessions)
+{
+	GVariantIter iter;
+	GVariant *array;
+	GDBusConnection *bus;
+	GVariant *reply;
+	GError *error = NULL;
+	gsize i;
+	gsize count;
+	int ret = -EINVAL;
+
+	g_log(G_LOG_DOMAIN, G_LOG_LEVEL_INFO, "listing sessions");
+
+	g_assert(NULL != sessions);
+
+	bus = bus_get();
+	if (NULL == bus) {
+		ret = -EINVAL;
+		goto end;
+	}
+
+	reply = g_dbus_connection_call_sync(bus,
+	                                    "org.freedesktop.ConsoleKit",
+	                                    "/org/freedesktop/ConsoleKit/Manager",
+	                                    "org.freedesktop.ConsoleKit.Manager",
+	                                    "GetSessions",
+	                                    NULL,
+	                                    G_VARIANT_TYPE("(ao)"),
+	                                    G_DBUS_CALL_FLAGS_NONE,
+	                                    -1,
+	                                    NULL,
+	                                    &error);
+	if (NULL == reply) {
+		g_log(G_LOG_DOMAIN,
+		      G_LOG_LEVEL_ERROR,
+		      "GetSessions() failed: %s",
+		      error->message);
+		g_error_free(error);
+		ret = -EINVAL;
+		goto end;
+	}
+
+	array = g_variant_get_child_value(reply, 0);
+	g_variant_iter_init(&iter, array);
+
+	count = g_variant_iter_n_children(&iter);
+	*sessions = g_new(char *, 1 + count);
+
+	for (i = 0; count > i; ++i) {
+		(void) g_variant_iter_loop(&iter, "o", &(*sessions)[i], NULL);
+		g_log(G_LOG_DOMAIN, G_LOG_LEVEL_INFO, "%s\n", (*sessions)[i]);
+	}
+
+	ret = 0;
+
+	/* the session IDs array must have a terminating NULL sentinel */
+	sessions[i] = NULL;
+
+	g_variant_unref(reply);
+	g_variant_unref(array);
+
+end:
+	return ret;
 }
