@@ -43,7 +43,7 @@ gboolean on_handle_inhibit(LoginKitManager *interface,
 
 	login_kit_manager_complete_inhibit(interface,
 	                                   invocation,
-	                                   g_variant_new("h", 1));
+	                                   g_variant_new("h", -1));
 	return TRUE;
 }
 
