@@ -4,9 +4,9 @@ Priority: optional
 Maintainer: Dima Krasner <dima@dimakrasner.com>
 Build-Depends: debhelper (>= 8.0.0), libglib2.0-dev, pkg-config
 Standards-Version: 3.9.4
-Homepage: https://git.devuan.org/pkgs-utopia-sobstitution/loginkit
-Vcs-Git: https://git.devuan.org/pkgs-utopia-sobstitution/loginkit.git
-Vcs-Browser: https://git.devuan.org/pkgs-utopia-sobstitution/loginkit
+Homepage: https://git.devuan.org/pkgs-utopia-substitution/loginkit
+Vcs-Git: https://git.devuan.org/pkgs-utopia-substitution/loginkit.git -b jessie
+Vcs-Browser: https://git.devuan.org/pkgs-utopia-substitution/loginkit
 
 Package: loginkit
 Architecture: any
