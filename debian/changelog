@@ -1,3 +1,11 @@
+loginkit (0.1+git20150221-1) testing; urgency=low
+
+  * Removed everything except Inhibit(), because xfce4-power-manager depends on
+    logind just because it disables its internal power management features.
+  * Created a Jessie branch
+
+ -- Dima Krasner <dima@dimakrasner.com>  Sat, 21 Feb 2015 12:11:52 +0200
+
 loginkit (0.1+git20141229-1) testing; urgency=low
 
   * Initial release

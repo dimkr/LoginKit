@@ -12,15 +12,13 @@ INCLUDE_DIR ?= $(PREFIX)/include
 
 CFLAGS += -I$(PWD)/..
 LDFLAGS += -L$(PWD)/../common
-LIBS = -lloginkit-common
+LIBS =
 
 GLIB_CFLAGS = $(shell $(PKG_CONFIG) --cflags glib-2.0)
 GLIB_LIBS = $(shell $(PKG_CONFIG) --libs glib-2.0)
 
 GIO_CFLAGS = $(shell $(PKG_CONFIG) --cflags gio-2.0 gio-unix-2.0)
 GIO_LIBS = $(shell $(PKG_CONFIG) --libs gio-2.0 gio-unix-2.0)
-
-PAM_LIBS = -lpam -lpam_misc
 
 SRCS = $(wildcard *.c)
 OBJS = $(SRCS:.c=.o)

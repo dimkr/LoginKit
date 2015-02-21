@@ -8,37 +8,26 @@
 Overview
 ========
 
-LoginKit is an attempt to implement a compatible, yet standalone alternative to
-logind and libsystemd (http://www.freedesktop.org/wiki/Software/systemd), which
-does not depend on a specific init system.
+LoginKit is an attempt to implement a logind
+(http://www.freedesktop.org/wiki/Software/systemd) shim, which allows packages
+that depend on it to work, without dependency on a specific init system.
 
-It acts as a glue layer that exposes logind's interface, but uses ConsoleKit2
-(https://github.com/ConsoleKit2/ConsoleKit2) as a backend.
-
-It's under heavy development and not ready for general use.
+This branch is targeted at the stock configuration of Devuan Jessie and allows
+xfce4-power-manager to run without a logind dependency.
 
 Dependencies
 ============
 
-LoginKit requires GLib, PAM and ConsoleKit2.
+LoginKit requires GLib.
 
 Building
 ========
 
-On Debian, install libpam0g-dev and libglib2.0-dev:
-   apt-get install -y libpam0g-dev libglib2.0-dev
+On Debian, install libglib2.0-dev:
+   apt-get install -y libglib2.0-dev
 
 To build LoginKit:
   make
-
-Usage
-=====
-
-  - Replace systemd's libsystemd*.so.0 with LoginKit's ones
-  - Kill systemd-logind
-  - Run loginkitd (quickly, before logind is restarted)
-  - Add pam_loginkit.so to PAM's modules directory
-  - Replace "pam_systemd" with "pam_loginkit", in PAM's configuration
 
 Credits and Legal Information
 =============================
